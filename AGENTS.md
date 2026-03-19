@@ -8,11 +8,25 @@ Fire-and-forget autonomous task runner — dispatches AI agents to work through 
 
 ## Common Commands
 
-<!-- Will be filled in as the project develops -->
+```bash
+npm run dev          # Start Next.js dev server
+npm run build        # Production build
+npm run lint         # Run ESLint
+npm run format       # Format with Prettier
+npm run format:check # Check formatting
+npm run typecheck    # TypeScript type checking
+```
 
 ## Directory Structure
 
-<!-- Will be filled in as the project develops -->
+```
+src/
+  app/               # Next.js App Router — web UI
+  dispatcher/        # CLI task runner — dispatches agents to work through epics
+  shared/            # Shared types and utilities
+docs/
+  decisions/         # Architecture decision records
+```
 
 ## Git Workflow
 

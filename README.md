@@ -15,12 +15,25 @@ TypeScript, Claude Agent SDK, Next.js, Docker
 
 ## Getting Started
 
-<!-- Setup instructions will go here -->
+```bash
+npm install
+npm run dev
+```
+
+Requires Node.js 20+.
 
 ## Common Commands
 
-<!-- Commands will be added as the project develops -->
+```bash
+npm run dev          # Start Next.js dev server
+npm run build        # Production build
+npm run lint         # Run ESLint
+npm run format       # Format with Prettier
+npm run typecheck    # TypeScript type checking
+```
 
 ## Environment Variables
 
-<!-- Document required env vars here -->
+| Variable | Description |
+|---|---|
+| `ANTHROPIC_API_KEY` | Claude API key for agent dispatch |
