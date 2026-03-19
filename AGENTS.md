@@ -34,6 +34,13 @@ Keep communication **friendly, approachable, and technically precise**. Emojis a
 - **Never merge a PR** unless the user explicitly says to merge it.
 - Always wait for explicit confirmation before either action.
 
+### Out-of-Scope Issues 🔍
+
+When you spot a problem that's outside the current issue's scope:
+
+- **Small fix** (contained to a single file **or** less than 10 lines total across files) — suggest fixing it in the current branch. Don't ask, just flag it and fix it.
+- **Larger fix** (spans multiple files **and** exceeds 10 lines) — create a new GitHub issue automatically with a clear description of the problem and suggested fix. Don't attempt the fix in the current branch.
+
 ### Coding Priority Hierarchy
 
 When two approaches conflict, the higher-priority value wins. Spend effort here first.
@@ -105,6 +112,12 @@ If a file exceeds the target, look for extraction opportunities. If it exceeds t
 - Short imperative commit messages: "Add user auth", not "Added user auth" or "This commit adds user auth".
 - Run linting and formatting before committing. Fix all errors.
 - Don't suppress lint rules without a justifying comment.
+
+### AGENTS.md vs PROJECT.md 📂
+
+- **`AGENTS.md`** contains standard rules generated from templates. It can be regenerated or updated by `/scaffold` at any time. **Do not add project-specific rules here** — they will be overwritten.
+- **`PROJECT.md`** contains project-specific rules, patterns, and conventions that evolved during development. This file takes precedence over `AGENTS.md` when they conflict.
+- When you discover a new convention or rule specific to this project, add it to `PROJECT.md`, not `AGENTS.md`.
 
 ### Memory and Context 🧠
 
@@ -270,29 +283,64 @@ When two domains need to interact:
 
 ## Frontend — React ⚛️
 
+### File Naming
+
+Use **kebab-case with type suffixes** for all files:
+
+| Type | Pattern | Example |
+|---|---|---|
+| Component | `name.component.tsx` | `job-card.component.tsx` |
+| Hook | `name.hook.ts` | `use-auth.hook.ts` |
+| Context | `name.context.tsx` | `theme.context.tsx` |
+| Types | `name.types.ts` | `job.types.ts` |
+| Utilities | `name.utils.ts` | `date.utils.ts` |
+| Tests | `name.test.tsx` | `job-card.test.tsx` |
+
 ### Components
 
 - **Function components only.** No class components.
 - **One component per file.** Named export matching the file name.
-- **Feature-based structure.** Group by feature, not by type. `dashboard/` contains the components, hooks, and types for that feature — not a separate `components/` and `hooks/` folder.
+- **Feature-based structure.** Group by feature, not by type:
+  ```
+  features/jobs/
+    jobs-page.component.tsx
+    job-card.component.tsx
+    job-actions.hook.ts
+    job.types.ts
+    job.context.tsx
+    job-detail/                  # Subfolder only for large sub-features
+      job-detail.component.tsx
+      job-detail-header.component.tsx
+  ```
+- **Smart/dumb pattern:** Only page/feature-level containers manage state and side effects. Reusable components must be presentational — props in, callbacks out.
+
+### File Ordering
+
+Within a component file, order sections top to bottom:
+
+1. **Exported component** (the main public API)
+2. **Sub-components** (private, used only in this file)
+3. **Types** (always at module level — never inside function bodies)
+4. **Helpers** (pure functions, formatters, etc.)
 
 ### State Management
 
-- **`useState` for local state.** Start here. Don't reach for anything else until you need it.
+- **`useState` for local UI state.** Start here. Don't reach for anything else until you need it.
 - **`useReducer` for complex local state** — multiple related values, or when the next state depends on the previous.
-- **React Context for shared state** that multiple components need (auth, theme, user session). Don't use Context for frequently-updating values — it re-renders all consumers.
-- **No external state library** unless Context becomes a clear bottleneck.
+- **React Context for shared UI state** that multiple components need (auth, theme, user session). Feature-scoped contexts are fine. Don't use Context for frequently-updating values — it re-renders all consumers.
+- **TanStack Query for server state** (recommended). It handles loading, error, caching, and revalidation — don't manually track `isLoading`/`error`/`data` with `useState` + `useEffect`. If the project uses TanStack Query, mock at the network or query level in tests.
+- **No external client state library** (Redux, Zustand, Jotai) unless Context becomes a clear bottleneck.
 
 ### Hooks
 
 - **Custom hooks for reusable logic.** Extract into `use<Name>` hooks when logic is shared between components or when a component's hook section exceeds ~15 lines.
 - **Keep hooks flat.** Don't nest hooks inside conditions or loops.
-- **`useEffect` sparingly.** Most effects are either data fetching (use the framework's loader instead) or synchronisation (often a sign of derived state that should be computed).
+- **`useEffect` sparingly.** Most effects are either data fetching (use TanStack Query or the framework's loader instead) or synchronisation (often a sign of derived state that should be computed). If you reach for `useEffect`, ask if there's a better way first.
 - **Cleanup in effects.** Always return a cleanup function for subscriptions, timers, and event listeners.
 
 ### Props
 
-- **TypeScript interfaces for props.** Define a `Props` type for every component.
+- **TypeScript interfaces for props.** Define a `Props` type for every component. Always at module level — never inside function bodies.
 - **Destructure props** in the function signature for readability.
 - **Default values via destructuring**, not `defaultProps`.
 - **`children` for composition.** Prefer `children` over render props or deeply nested config objects.
@@ -309,6 +357,15 @@ When two domains need to interact:
 - **No index as key** in lists where items can be reordered, added, or removed.
 - **No prop drilling past 2 levels.** Use Context or restructure the component tree.
 - **No `useEffect` for derived state.** Compute it inline or with `useMemo`.
+- **No type definitions inside function bodies.** Types are always module-level.
+
+### Testing
+
+- **React Testing Library** for component tests. Test behaviour, not implementation.
+- **Query by role, label, or text** — not by class name or test ID.
+- **`userEvent` over `fireEvent`** — it simulates real user interactions more accurately.
+- **Don't test implementation details** — no querying by component internals, no checking state directly.
+- **Jest or Vitest** for unit tests on hooks and utilities.
 
 ## Frontend — Next.js ▲
 
