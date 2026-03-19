@@ -68,7 +68,11 @@ Wait for the user's decision before proceeding. Don't force anything.
 
 ## Step 4 — Show Context
 
-Display a brief summary:
+Set the terminal tab title and display a brief summary:
+
+```bash
+echo -ne "\033]0;#<number> — <title>\007"
+```
 
 ```
 🎯 Working on #<number>: <title>
