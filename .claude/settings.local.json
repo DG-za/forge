@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash",
+      "WebFetch",
+      "WebSearch",
+      "Update",
+      "mcp__github__get_issue",
+      "mcp__github__list_issues",
+      "mcp__github__update_issue",
+      "mcp__github__add_issue_comment",
+      "mcp__github__create_issue",
+      "mcp__github__create_or_update_file",
+      "mcp__github__get_file_contents",
+      "mcp__ticktick__get_user_projects",
+      "mcp__ticktick__get_project_with_data",
+      "mcp__ticktick__get_inbox_tasks",
+      "mcp__ticktick__create_task",
+      "mcp__ticktick__delete_task",
+      "mcp__ticktick__complete_task"
+    ]
+  },
+  "enabledMcpjsonServers": ["github", "ticktick"],
+  "prefersReducedMotion": false
+}

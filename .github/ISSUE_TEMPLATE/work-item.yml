@@ -1,0 +1,46 @@
+name: Work Item
+description: Feature, bug fix, refactor, investigation, or documentation task
+title: ""
+labels: []
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - feature
+        - bug
+        - refactor
+        - investigation
+        - documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to happen and why?
+      placeholder: Describe the work clearly and concisely.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Done when ✅
+      description: How do we know this is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Context, constraints, related issues, or anything else.
+      placeholder: Optional.
+    validations:
+      required: false
