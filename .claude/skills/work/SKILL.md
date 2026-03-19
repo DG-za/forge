@@ -46,6 +46,7 @@ Wait for the user's decision before proceeding. Don't force anything.
    ```bash
    gh issue list --state open --json number,title,labels --limit 15
    ```
+   If there are no obvious open issues to work on, check `docs/roadmap.md` — if the current phase is complete or there are no open issues for it, suggest starting the next phase: "No open issues. The roadmap shows Phase X is next. Want me to run `/roadmap` to create issues for it?"
 3. Fetch full issue details: `gh issue view <number> --json title,body,labels,state`
 4. Read `CONTEXT.md` to determine **work mode** (look for `Work Mode: autonomous` or `Work Mode: manual`). Default to **manual** if not specified.
 5. A `--manual` or `--autonomous` flag in the arguments overrides the project setting for this session.
