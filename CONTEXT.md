@@ -12,16 +12,12 @@
 
 ## Key Decisions
 
-- We chose the **Claude Agent SDK** over raw API / LangGraph / CrewAI because it provides built-in tool execution (file I/O, shell, web) out of the box. The tradeoff is Claude-only lock-in, which is acceptable for this project.
-- **Opus for dispatcher, Sonnet for workers** — dispatcher needs strong reasoning for planning; workers generate far more tokens so the cheaper model saves significant cost.
-- **Sequential workers** (not parallel) — Opus rate limits are strict; parallel agents risk throttling. Can revisit at higher tiers.
-- **Docker containers for worker isolation** — `bypassPermissions` mode only inside containers, never on bare metal.
+- **Agent platform:** Pending — researched Claude Agent SDK, OpenAI Codex SDK, Cursor Cloud, Google ADK. See `docs/briefs/agent-sdk-research.md` for full comparison.
 
 ## Patterns and Conventions
 
-- Always set `maxBudgetUsd` and `maxTurns` on every `query()` call to prevent runaway costs.
-- Load project conventions via `settingSources: ["project"]` so workers follow CLAUDE.md/AGENTS.md.
-- Track cumulative cost manually across workers — the SDK doesn't aggregate across sessions.
+<!-- Record established patterns. Format: "All API calls go through api.ts wrapper." -->
+<!-- This section is auto-updated by the AI agent when new patterns are agreed on. -->
 
 ## References
 
