@@ -28,6 +28,7 @@
 - Dispatcher logic lives in `src/dispatcher/` as a pure library — no HTTP concerns. Web layer calls into it.
 - `AgentRunner` interface abstracts platform differences. `ClaudeRunner` and `OpenAIRunner` implement it.
 - Three agent roles: Planner (strong reasoning model), Coder (cost-effective model, TDD), Reviewer (different vendor than Coder).
+- Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client.js` (custom output path), not from `@prisma/client`.
 
 ## References
 
