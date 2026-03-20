@@ -18,3 +18,15 @@ This applies to:
 - **Worker agents dispatched by Forge** — when a worker implements an issue on a target repo, it follows the same loop: write tests from acceptance criteria, then implement.
 
 **No exceptions.** Don't write implementation code before tests exist for the behaviour you're adding. If you're unsure what to test, that means the acceptance criteria are unclear — clarify first.
+
+## Local-First Development 🏠
+
+Everything must run locally with a single command. No mocking services that can run locally instead.
+
+- **Postgres:** Docker Compose for local dev. Tests use **Testcontainers** to spin up a real Postgres instance — no mocking the database.
+- **Agent SDKs:** These are the only thing we mock in tests (they cost money and hit external APIs). Use interface-based mocking via the `AgentRunner` abstraction.
+- **GitHub API:** Use real `gh` CLI in integration tests against a test repo where possible. Mock only in unit tests for pure logic.
+- **`docker compose up`** should start everything needed for local development (Postgres, any other services).
+- **`npm test`** should work out of the box on a fresh clone after `npm install` and `docker compose up`.
+
+**Rule: if a dependency can run locally, run it locally. Only mock what is expensive or external (LLM APIs, third-party webhooks).**

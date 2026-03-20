@@ -21,6 +21,7 @@
 - **Architecture:** No CLI — web UI + backend only. Dispatcher is a library (`src/dispatcher/`) called by Next.js API routes/server actions. One process, one deployment.
 - **Database:** Postgres via Prisma ORM. Stores run state, costs, issue progress. Enables resume after restarts.
 - **Testing:** Strict TDD — write tests first, then implement. Applies to all Forge code and to worker agents dispatched by Forge. No implementation before tests. See `PROJECT.md` for the full workflow and `docs/decisions/003-tdd-testing-strategy.md` for rationale.
+- **Local-first:** Everything runs locally via Docker Compose. Tests use Testcontainers for Postgres (no DB mocks). Only mock LLM APIs (expensive/external). See `PROJECT.md` for full rules.
 
 ## Patterns and Conventions
 
