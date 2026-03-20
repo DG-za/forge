@@ -17,10 +17,13 @@ TypeScript, Claude Agent SDK, Next.js, Docker
 
 ```bash
 npm install
+docker compose up -d          # Start local Postgres
+cp .env.example .env          # Configure DATABASE_URL (defaults work with Docker Compose)
+npx prisma migrate deploy     # Apply database migrations
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the dashboard. Requires Node.js 20+.
+Open [http://localhost:3000](http://localhost:3000) to see the dashboard. Requires Node.js 20+ and Docker Desktop.
 
 ## Common Commands
 
@@ -28,12 +31,17 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard. Requir
 |---|---|
 | `npm run dev` | Start Next.js dev server |
 | `npm run build` | Production build |
+| `npm test` | Run tests (uses Testcontainers — needs Docker) |
+| `npm run test:watch` | Run tests in watch mode |
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format with Prettier |
 | `npm run typecheck` | TypeScript type checking |
+| `docker compose up -d` | Start local Postgres |
+| `npx prisma migrate deploy` | Apply database migrations |
 
 ## Environment Variables
 
 | Variable | Description |
 |---|---|
+| `DATABASE_URL` | Postgres connection string (see `.env.example`) |
 | `ANTHROPIC_API_KEY` | Claude API key for agent dispatch |
