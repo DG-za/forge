@@ -19,7 +19,7 @@
 - **Budget:** Per-epic budget caps (not per-issue). Display in USD.
 - **Architecture:** No CLI — web UI + backend only. Dispatcher is a library (`src/dispatcher/`) called by Next.js API routes/server actions. One process, one deployment.
 - **Database:** Postgres via Prisma ORM. Stores run state, costs, issue progress. Enables resume after restarts.
-- **Testing:** TDD integrated into every phase — no separate testing phase. Worker agents write tests first, then implement. See `docs/decisions/003-tdd-testing-strategy.md`.
+- **Testing:** Strict TDD — write tests first, then implement. Applies to all Forge code and to worker agents dispatched by Forge. No implementation before tests. See `PROJECT.md` for the full workflow and `docs/decisions/003-tdd-testing-strategy.md` for rationale.
 
 ## Patterns and Conventions
 
