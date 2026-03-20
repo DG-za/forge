@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RunStatus {
+  pending
+  planning
+  in_progress
+  completed
+  failed
+}
+
+enum IssueStatus {
+  queued
+  coding
+  gates
+  reviewing
+  fixing
+  done
+  failed
+  escalated
+}
+
+enum AgentRole {
+  planner
+  coder
+  reviewer
+}
+
+model Run {
+  id         String    @id @default(cuid())
+  repo       String
+  epicNumber Int
+  status     RunStatus @default(pending)
+  budgetUsd  Float?
+  config     Json
+  issues     Issue[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Issue {
+  id           String      @id @default(cuid())
+  run          Run         @relation(fields: [runId], references: [id])
+  runId        String
+  issueNumber  Int
+  title        String
+  status       IssueStatus @default(queued)
+  costUsd      Float       @default(0)
+  inputTokens  Int         @default(0)
+  outputTokens Int         @default(0)
+  agentLogs    AgentLog[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model AgentLog {
+  id           String    @id @default(cuid())
+  issue        Issue     @relation(fields: [issueId], references: [id])
+  issueId      String
+  role         AgentRole
+  platform     String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float
+  durationMs   Int
+  result       String?
+  createdAt    DateTime  @default(now())
+}

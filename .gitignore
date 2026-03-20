@@ -34,3 +34,5 @@ next-env.d.ts
 # AI review and planning artifacts
 docs/reviews/
 docs/planning/
+
+/generated/prisma
