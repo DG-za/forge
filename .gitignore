@@ -29,6 +29,7 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
 
 # AI review and planning artifacts
 docs/reviews/

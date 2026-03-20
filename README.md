@@ -20,17 +20,17 @@ npm install
 npm run dev
 ```
 
-Requires Node.js 20+.
+Open [http://localhost:3000](http://localhost:3000) to see the dashboard. Requires Node.js 20+.
 
 ## Common Commands
 
-```bash
-npm run dev          # Start Next.js dev server
-npm run build        # Production build
-npm run lint         # Run ESLint
-npm run format       # Format with Prettier
-npm run typecheck    # TypeScript type checking
-```
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format with Prettier |
+| `npm run typecheck` | TypeScript type checking |
 
 ## Environment Variables
 
