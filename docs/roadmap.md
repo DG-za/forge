@@ -39,7 +39,7 @@ Questions phase (#6) for batch Q&A before autonomous work begins, ntfy push noti
 **Epic:** #18
 **Status:** not started — sub-issues will be created when this phase begins
 
-Dockerize the full stack (#11), deploy to the home server, and run an end-to-end test (#12) against a real epic on a side project. This is the acceptance test for the whole system.
+Dockerize the full stack (#11), deploy to the home server, and run a live smoke test (#12) against a real epic on a side project. This validates the full cycle in production — not the first time we test, just the first real-world run.
 
 ## Completed Phases
 
