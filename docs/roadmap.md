@@ -4,21 +4,23 @@
 
 ## Current Phase
 
-### Phase 1: Foundation 🧱
-
-**Epic:** #1 (parent)
-**Status:** in progress — research brief pending merge (PR #14)
-
-Project bootstrap, research across agent platforms (Claude, OpenAI, Cursor, Gemini), and architecture decisions. Multi-platform support chosen — Claude Agent SDK + OpenAI Codex SDK behind an `AgentRunner` abstraction. Autonomous workflow pipeline designed (Planner → Coder → Reviewer with cross-model review).
-
-## Upcoming Phases
-
 ### Phase 2: Core Engine ⚙️
 
 **Epic:** #15
-**Status:** not started — sub-issues will be created when this phase begins
+**Status:** in progress — 0/8 issues done
 
-Build the core autonomous pipeline: `AgentRunner` abstraction (Claude + OpenAI), Planner agent (epic decomposition), Coder agent (TDD loop), Reviewer agent (cross-model review), deterministic quality gates (lint, type-check, tests), review-fix loop (max 4 iterations), cost tracking, and state machine. This is the engine that powers everything else.
+Build the core autonomous pipeline. Issues in dependency order:
+
+1. #21 — Prisma + Postgres schema
+2. #22 — AgentRunner abstraction (Claude + OpenAI)
+3. #23 — Dispatcher state machine
+4. #24 — Planner agent
+5. #25 — Coder agent (TDD + quality gates)
+6. #26 — Reviewer agent (cross-model review + fix loop)
+7. #27 — Cost tracking and budget enforcement
+8. #28 — Pipeline orchestrator (end-to-end flow)
+
+## Upcoming Phases
 
 ### Phase 3: Web UI 📲
 
@@ -57,4 +59,8 @@ When workers create PRs on target repos, automatically deploy a preview so you c
 
 ## Completed Phases
 
-(none yet)
+### Phase 1: Foundation 🧱
+
+**Epic:** #1 (parent)
+
+Project bootstrap, multi-platform research (Claude, OpenAI, Cursor, Gemini), architecture decisions (001–004), TDD workflow, and 7-phase roadmap.
