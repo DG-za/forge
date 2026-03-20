@@ -3,7 +3,7 @@
 ## Project
 
 **What:** Fire-and-forget autonomous task runner — dispatches AI agents to work through GitHub epics
-**Stack:** TypeScript, Claude Agent SDK, Next.js, Docker
+**Stack:** TypeScript, Claude Agent SDK + OpenAI Codex SDK, Next.js, Docker
 **Owner:** Stefan Els
 
 ## Work Mode
@@ -12,7 +12,8 @@
 
 ## Key Decisions
 
-- **Agent platform:** Pending — researched Claude Agent SDK, OpenAI Codex SDK, Cursor Cloud, Google ADK. See `docs/briefs/agent-sdk-research.md` for full comparison.
+- **Agent platform:** Multi-platform — Claude Agent SDK + OpenAI Codex SDK behind an `AgentRunner` abstraction. Dispatcher and workers can use different platforms (mix and match). See `docs/decisions/001-multi-platform-agent-support.md`.
+- **Model selection:** Platform + model configurable per role (dispatcher vs worker). Enables Claude Opus for planning + OpenAI Codex for implementation, or any combination.
 
 ## Patterns and Conventions
 
