@@ -21,7 +21,6 @@
     "dotenv": "^17.3.1",
     "next": "^15.2.4",
     "pg": "^8.20.0",
-    "prisma": "^7.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -29,7 +28,8 @@
     "@eslint/js": "^9.22.0",
     "@testcontainers/postgresql": "^11.13.0",
     "@types/node": "^22.13.14",
-    "@types/pg": "^8.20.0",
+    "@types/pg": "8.11.11",
+    "prisma": "^7.5.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.22.0",
