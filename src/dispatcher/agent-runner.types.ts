@@ -47,11 +47,7 @@ export type ErrorMessage = {
   cost: Cost;
 };
 
-export type AgentMessage =
-  | ProgressMessage
-  | ToolUseMessage
-  | ResultMessage
-  | ErrorMessage;
+export type AgentMessage = ProgressMessage | ToolUseMessage | ResultMessage | ErrorMessage;
 
 export interface AgentRunner {
   readonly platform: Platform;
