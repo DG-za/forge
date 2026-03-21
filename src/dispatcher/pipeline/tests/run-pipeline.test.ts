@@ -39,10 +39,17 @@ function buildRunner(platform: 'claude' | 'openai', responses: AgentMessage[]): 
   return {
     platform,
     async *run() {
-      yield responses[callIndex++ % responses.length];
+      yield responses[Math.min(callIndex++, responses.length - 1)];
     },
   };
 }
+
+const emptyPlan: Plan = { summary: 'No more tasks.', tasks: [] };
+
+const remainingAfterFirstPlan: Plan = {
+  summary: 'Remaining after task one.',
+  tasks: [simplePlan.tasks[1]],
+};
 
 const allPassExec: CommandExecutor = async () => ({ exitCode: 0, output: '' });
 
@@ -66,7 +73,7 @@ function baseConfig(overrides: Partial<PipelineConfig> = {}): PipelineConfig {
   return {
     repo: 'owner/repo',
     epicNumber: 10,
-    planner: { runner: buildRunner('claude', [planResponse(simplePlan)]), model: 'claude-opus' },
+    planner: { runner: buildRunner('claude', [planResponse(simplePlan), planResponse(remainingAfterFirstPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
     coder: { runner: buildRunner('claude', [resultMessage('Coded')]), model: 'claude-sonnet' },
     reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
     gateConfig: { lintCommand: 'lint', typecheckCommand: 'tsc', testCommand: 'test' },
@@ -79,6 +86,7 @@ function baseConfig(overrides: Partial<PipelineConfig> = {}): PipelineConfig {
 
 function baseOptions(overrides: Partial<RunPipelineOptions> = {}): RunPipelineOptions {
   return {
+    runId: 'test-run-1',
     config: baseConfig(overrides.config ? overrides.config : {}),
     issueFetcher: mockFetcher,
     getDiff: async () => 'diff content',
@@ -232,5 +240,108 @@ describe('runPipeline', () => {
 
     expect(result.outcomes).toHaveLength(0);
     expect(result.completedCount).toBe(0);
+  });
+});
+
+describe('runPipeline — re-planning', () => {
+  it('should call planner once for initial plan plus once per issue for replan', async () => {
+    let plannerCall = 0;
+    const plannerSpy = vi.fn(async function* () {
+      plannerCall++;
+      if (plannerCall === 1) yield planResponse(simplePlan);
+      else if (plannerCall === 2) yield planResponse(remainingAfterFirstPlan);
+      else yield planResponse(emptyPlan);
+    });
+    const plannerRunner: AgentRunner = { platform: 'claude', run: plannerSpy };
+    const config = baseConfig({ planner: { runner: plannerRunner, model: 'claude-opus' } });
+
+    await runPipeline(baseOptions({ config }));
+
+    // 1 initial plan + 1 replan after issue 1 (issue 2 is the last, no replan)
+    expect(plannerSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('should use revised plan for subsequent issues', async () => {
+    const revisedPlan: Plan = {
+      summary: 'Revised after task one.',
+      tasks: [
+        { issueNumber: 99, title: 'New task from replan', acceptanceCriteria: ['new'], dependencies: [], complexity: 'small' },
+      ],
+    };
+
+    let plannerCall = 0;
+    const plannerRun = vi.fn(async function* () {
+      plannerCall++;
+      if (plannerCall === 1) yield planResponse(simplePlan);
+      else if (plannerCall === 2) yield planResponse(revisedPlan);
+      else yield planResponse(emptyPlan);
+    });
+    const plannerRunner: AgentRunner = { platform: 'claude', run: plannerRun };
+    const config = baseConfig({ planner: { runner: plannerRunner, model: 'claude-opus' } });
+
+    const result = await runPipeline(baseOptions({ config }));
+
+    // Issue 1 from initial plan, replan returns issue 99 (last task, no further replan)
+    expect(result.outcomes).toHaveLength(2);
+    expect(result.outcomes[0].issueNumber).toBe(1);
+    expect(result.outcomes[1].issueNumber).toBe(99);
+  });
+
+  it('should continue with remaining original tasks when replan fails', async () => {
+    let plannerCall = 0;
+    const plannerRun = vi.fn(async function* () {
+      plannerCall++;
+      if (plannerCall === 1) {
+        yield planResponse(simplePlan);
+      } else {
+        yield errorMessage('Replan failed');
+      }
+    });
+    const plannerRunner: AgentRunner = { platform: 'claude', run: plannerRun };
+    const config = baseConfig({ planner: { runner: plannerRunner, model: 'claude-opus' } });
+
+    const result = await runPipeline(baseOptions({ config }));
+
+    // Both original tasks should complete despite replan failure
+    expect(result.outcomes).toHaveLength(2);
+    expect(result.outcomes[0].issueNumber).toBe(1);
+    expect(result.outcomes[1].issueNumber).toBe(2);
+  });
+
+  it('should not replan after the last issue', async () => {
+    const singleTaskPlan: Plan = {
+      summary: 'One task only.',
+      tasks: [{ issueNumber: 1, title: 'Only task', acceptanceCriteria: ['works'], dependencies: [], complexity: 'small' }],
+    };
+
+    const plannerSpy = vi.fn(async function* () {
+      yield planResponse(singleTaskPlan);
+    });
+    const plannerRunner: AgentRunner = { platform: 'claude', run: plannerSpy };
+    const config = baseConfig({ planner: { runner: plannerRunner, model: 'claude-opus' } });
+
+    await runPipeline(baseOptions({ config }));
+
+    // 1 initial plan, no replan after the only issue
+    expect(plannerSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should accumulate replan cost in totalCost', async () => {
+    const planCost: Cost = { inputTokens: 500, outputTokens: 200, costUsd: 0.05 };
+    let plannerCall = 0;
+    const plannerRun = vi.fn(async function* () {
+      plannerCall++;
+      if (plannerCall === 1) yield planResponse(simplePlan, planCost);
+      else if (plannerCall === 2) yield planResponse(remainingAfterFirstPlan, planCost);
+      else yield planResponse(emptyPlan, planCost);
+    });
+    const plannerRunner: AgentRunner = { platform: 'claude', run: plannerRun };
+    const config = baseConfig({ planner: { runner: plannerRunner, model: 'claude-opus' } });
+
+    const result = await runPipeline(baseOptions({ config }));
+
+    // 1 initial plan + 1 replan after issue 1 = 2 × $0.05 = $0.10 planner cost
+    expect(result.totalCost.costUsd).toBeGreaterThanOrEqual(0.10);
+    expect(result.totalCost.inputTokens).toBeGreaterThanOrEqual(1000);
   });
 });

@@ -32,7 +32,7 @@ export function createPipelineApi(): PipelineApi {
 
     runs.set(runId, { status: { state: 'running' }, controller });
 
-    runPipeline({ ...input, signal: controller.signal })
+    runPipeline({ runId, ...input, signal: controller.signal })
       .then((result) => {
         const entry = runs.get(runId);
         if (entry) entry.status = { state: 'completed', result };

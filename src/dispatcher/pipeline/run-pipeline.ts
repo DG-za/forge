@@ -1,11 +1,13 @@
 import type { Cost } from '../agent-runner.types';
-import type { IssueFetcher, Plan } from '../planner/planner.types';
-import { runPlanner } from '../planner/run-planner';
+import { addCost } from '../cost.utils';
+import type { CompletedIssue, EpicContext, IssueFetcher, Plan, PlannedTask } from '../planner/planner.types';
+import { replan, runPlanner } from '../planner/run-planner';
 import type { StateChangeEvent, StateChangeListener } from '../state-machine.types';
 import type { IssueOutcome, PipelineConfig, PipelineResult } from './pipeline.types';
 import { processIssue } from './process-issue';
 
 export type RunPipelineOptions = {
+  runId: string;
   config: PipelineConfig;
   issueFetcher: IssueFetcher;
   getDiff: () => Promise<string>;
@@ -15,12 +17,12 @@ export type RunPipelineOptions = {
 export type FullPipelineResult = PipelineResult & { plan: Plan };
 
 export async function runPipeline(options: RunPipelineOptions): Promise<FullPipelineResult> {
-  const { config, issueFetcher, signal } = options;
+  const { runId, config, issueFetcher, signal } = options;
   const emit = buildEmitter(config.onStateChange);
   let totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   const outcomes: IssueOutcome[] = [];
 
-  emit({ kind: 'run', transition: { runId: '', from: 'pending', to: 'planning' } });
+  emit({ kind: 'run', transition: { runId, from: 'pending', to: 'planning' } });
 
   const epicContext = await issueFetcher.fetchEpic(config.repo, config.epicNumber);
 
@@ -35,16 +37,19 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     totalCost = addCost(totalCost, planResult.cost);
     plan = planResult.plan;
   } catch {
-    emit({ kind: 'run', transition: { runId: '', from: 'planning', to: 'failed' } });
-    return { runId: '', totalCost, outcomes, plan: { tasks: [], summary: '' }, ...counters(outcomes) };
+    emit({ kind: 'run', transition: { runId, from: 'planning', to: 'failed' } });
+    return { runId, totalCost, outcomes, plan: { tasks: [], summary: '' }, ...counters(outcomes) };
   }
 
-  emit({ kind: 'run', transition: { runId: '', from: 'planning', to: 'in_progress' } });
+  emit({ kind: 'run', transition: { runId, from: 'planning', to: 'in_progress' } });
 
-  for (const task of plan.tasks) {
+  let remainingTasks = [...plan.tasks];
+
+  while (remainingTasks.length > 0) {
     if (signal?.aborted) break;
     if (totalCost.costUsd >= config.maxBudgetUsd) break;
 
+    const task = remainingTasks.shift()!;
     const remainingBudget = config.maxBudgetUsd - totalCost.costUsd;
 
     try {
@@ -73,12 +78,20 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
         cost: { inputTokens: 0, outputTokens: 0, costUsd: 0 },
       });
     }
+
+    if (remainingTasks.length > 0) {
+      const replanResult = await tryReplan(config, epicContext, plan, outcomes);
+      if (replanResult) {
+        totalCost = addCost(totalCost, replanResult.cost);
+        remainingTasks = replanResult.tasks;
+      }
+    }
   }
 
   const finalState = outcomes.some((o) => o.status === 'done') ? 'completed' : 'failed';
-  emit({ kind: 'run', transition: { runId: '', from: 'in_progress', to: finalState } });
+  emit({ kind: 'run', transition: { runId, from: 'in_progress', to: finalState } });
 
-  return { runId: '', totalCost, outcomes, plan, ...counters(outcomes) };
+  return { runId, totalCost, outcomes, plan, ...counters(outcomes) };
 }
 
 function counters(outcomes: IssueOutcome[]) {
@@ -89,14 +102,40 @@ function counters(outcomes: IssueOutcome[]) {
   };
 }
 
-function buildEmitter(listener?: StateChangeListener): (event: StateChangeEvent) => void {
-  return listener ? (event) => listener(event) : () => {};
+async function tryReplan(
+  config: PipelineConfig,
+  epicContext: EpicContext,
+  originalPlan: Plan,
+  outcomes: IssueOutcome[],
+): Promise<{ tasks: PlannedTask[]; cost: Cost } | null> {
+  try {
+    const result = await replan({
+      runner: config.planner.runner,
+      model: config.planner.model,
+      epicContext,
+      maxBudgetUsd: config.maxBudgetUsd,
+      replanContext: {
+        originalPlan,
+        completedIssues: toCompletedIssues(outcomes),
+        remainingIssues: epicContext.issues.filter(
+          (i) => !outcomes.some((o) => o.issueNumber === i.number),
+        ),
+      },
+    });
+    return { tasks: result.plan.tasks, cost: result.cost };
+  } catch {
+    return null;
+  }
 }
 
-function addCost(a: Cost, b: Cost): Cost {
-  return {
-    inputTokens: a.inputTokens + b.inputTokens,
-    outputTokens: a.outputTokens + b.outputTokens,
-    costUsd: a.costUsd + b.costUsd,
-  };
+function toCompletedIssues(outcomes: IssueOutcome[]): CompletedIssue[] {
+  return outcomes.map((o) => ({
+    issueNumber: o.issueNumber,
+    outcome: o.status,
+    notes: '',
+  }));
+}
+
+function buildEmitter(listener?: StateChangeListener): (event: StateChangeEvent) => void {
+  return listener ? (event) => listener(event) : () => {};
 }

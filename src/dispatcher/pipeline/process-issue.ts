@@ -2,8 +2,9 @@ import type { Cost } from '../agent-runner.types';
 import type { CommandExecutor, QualityGateConfig } from '../coder/coder.types';
 import type { CoderTask } from '../coder/coder.types';
 import { runCoder } from '../coder/run-coder';
+import { addCost } from '../cost.utils';
 import { runReviewer } from '../reviewer/run-reviewer';
-import type { RoleConfig } from './pipeline.types';
+import type { IssueOutcome, RoleConfig } from './pipeline.types';
 
 export type ProcessIssueOptions = {
   task: CoderTask;
@@ -16,13 +17,7 @@ export type ProcessIssueOptions = {
   getDiff: () => Promise<string>;
 };
 
-type IssueResult = {
-  issueNumber: number;
-  status: 'done' | 'failed' | 'escalated';
-  cost: Cost;
-};
-
-export async function processIssue(options: ProcessIssueOptions): Promise<IssueResult> {
+export async function processIssue(options: ProcessIssueOptions): Promise<IssueOutcome> {
   let totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   const issueNumber = options.task.issueNumber ?? 0;
 
@@ -67,12 +62,4 @@ export async function processIssue(options: ProcessIssueOptions): Promise<IssueR
   }
 
   return { issueNumber, status: 'done', cost: totalCost };
-}
-
-function addCost(a: Cost, b: Cost): Cost {
-  return {
-    inputTokens: a.inputTokens + b.inputTokens,
-    outputTokens: a.outputTokens + b.outputTokens,
-    costUsd: a.costUsd + b.costUsd,
-  };
 }
