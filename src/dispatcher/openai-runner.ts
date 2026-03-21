@@ -1,25 +1,20 @@
 import { Codex, type CodexOptions, type ThreadItem, type Usage } from '@openai/codex-sdk';
-import type {
-  AgentMessage,
-  AgentRunner,
-  Cost,
-  RunOptions,
-} from './agent-runner.types';
+import type { AgentMessage, AgentRunner, Cost, RunOptions } from './agent-runner.types';
 
 /**
  * Per-1M-token pricing for OpenAI models.
  * Update when new models are added or prices change.
  */
 const PRICING: Record<string, { input: number; output: number }> = {
-  'o4-mini': { input: 1.10, output: 4.40 },
-  'o3': { input: 2.00, output: 8.00 },
-  'o3-mini': { input: 0.50, output: 1.10 },
-  'gpt-4.1': { input: 2.00, output: 8.00 },
-  'gpt-4.1-mini': { input: 0.40, output: 1.60 },
-  'gpt-4.1-nano': { input: 0.10, output: 0.40 },
+  'o4-mini': { input: 1.1, output: 4.4 },
+  o3: { input: 2.0, output: 8.0 },
+  'o3-mini': { input: 0.5, output: 1.1 },
+  'gpt-4.1': { input: 2.0, output: 8.0 },
+  'gpt-4.1-mini': { input: 0.4, output: 1.6 },
+  'gpt-4.1-nano': { input: 0.1, output: 0.4 },
 };
 
-const DEFAULT_PRICING = { input: 2.00, output: 8.00 };
+const DEFAULT_PRICING = { input: 2.0, output: 8.0 };
 
 export class OpenAIRunner implements AgentRunner {
   readonly platform = 'openai' as const;
@@ -84,9 +79,7 @@ function computeCost(model: string, usage: Usage | null): Cost {
   if (!usage) return { inputTokens: 0, outputTokens: 0, costUsd: 0 };
 
   const pricing = PRICING[model] ?? DEFAULT_PRICING;
-  const costUsd =
-    (usage.input_tokens / 1_000_000) * pricing.input +
-    (usage.output_tokens / 1_000_000) * pricing.output;
+  const costUsd = (usage.input_tokens / 1_000_000) * pricing.input + (usage.output_tokens / 1_000_000) * pricing.output;
 
   return {
     inputTokens: usage.input_tokens,

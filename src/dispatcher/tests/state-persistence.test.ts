@@ -1,16 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
-import { PrismaClient } from '../../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
-import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import pg from 'pg';
-import { persistRunTransition, persistIssueTransition } from '../state-persistence';
+import { describe, expect, it, vi } from 'vitest';
+import { PrismaClient } from '../../../generated/prisma/client.js';
 import { InvalidTransitionError } from '../invalid-transition.error';
-import { createRun, createIssue } from './factories';
 import type { StateChangeListener } from '../state-machine.types';
+import { persistIssueTransition, persistRunTransition } from '../state-persistence';
+import { createIssue, createRun } from './factories';
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;
@@ -53,9 +50,7 @@ describe('persistRunTransition', () => {
   it('should reject an invalid run transition and leave DB unchanged', async () => {
     const run = await createRun(prisma);
 
-    await expect(
-      persistRunTransition(prisma, run.id, 'completed'),
-    ).rejects.toThrow(InvalidTransitionError);
+    await expect(persistRunTransition(prisma, run.id, 'completed')).rejects.toThrow(InvalidTransitionError);
 
     const unchanged = await prisma.run.findUniqueOrThrow({ where: { id: run.id } });
     expect(unchanged.status).toBe('pending');
@@ -101,9 +96,7 @@ describe('persistIssueTransition', () => {
     const run = await createRun(prisma);
     const issue = await createIssue(prisma, run.id);
 
-    await expect(
-      persistIssueTransition(prisma, issue.id, 'done'),
-    ).rejects.toThrow(InvalidTransitionError);
+    await expect(persistIssueTransition(prisma, issue.id, 'done')).rejects.toThrow(InvalidTransitionError);
 
     const unchanged = await prisma.issue.findUniqueOrThrow({ where: { id: issue.id } });
     expect(unchanged.status).toBe('queued');

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { transitionIssue, ISSUE_TRANSITIONS } from '../issue-state-machine';
+import { describe, expect, it } from 'vitest';
 import { InvalidTransitionError } from '../invalid-transition.error';
+import { ISSUE_TRANSITIONS, transitionIssue } from '../issue-state-machine';
 import type { IssueState } from '../state-machine.types';
 
 describe('transitionIssue', () => {
@@ -45,45 +45,31 @@ describe('transitionIssue', () => {
   });
 
   it('should reject queued → reviewing', () => {
-    expect(() => transitionIssue('queued', 'reviewing')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('queued', 'reviewing')).toThrow(InvalidTransitionError);
   });
 
   it('should reject coding → done', () => {
-    expect(() => transitionIssue('coding', 'done')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('coding', 'done')).toThrow(InvalidTransitionError);
   });
 
   it('should reject gates → done (must go through reviewing)', () => {
-    expect(() => transitionIssue('gates', 'done')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('gates', 'done')).toThrow(InvalidTransitionError);
   });
 
   it('should reject fixing → reviewing (must go through gates)', () => {
-    expect(() => transitionIssue('fixing', 'reviewing')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('fixing', 'reviewing')).toThrow(InvalidTransitionError);
   });
 
   it('should reject done → queued (terminal state)', () => {
-    expect(() => transitionIssue('done', 'queued')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('done', 'queued')).toThrow(InvalidTransitionError);
   });
 
   it('should reject failed → queued (terminal state)', () => {
-    expect(() => transitionIssue('failed', 'queued')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('failed', 'queued')).toThrow(InvalidTransitionError);
   });
 
   it('should reject escalated → queued (terminal state)', () => {
-    expect(() => transitionIssue('escalated', 'queued')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionIssue('escalated', 'queued')).toThrow(InvalidTransitionError);
   });
 
   it('should include entity and states in the error', () => {
@@ -113,16 +99,7 @@ describe('ISSUE_TRANSITIONS', () => {
   });
 
   it('should cover all IssueState values', () => {
-    const allStates: IssueState[] = [
-      'queued',
-      'coding',
-      'gates',
-      'reviewing',
-      'fixing',
-      'done',
-      'failed',
-      'escalated',
-    ];
+    const allStates: IssueState[] = ['queued', 'coding', 'gates', 'reviewing', 'fixing', 'done', 'failed', 'escalated'];
     expect(Object.keys(ISSUE_TRANSITIONS).sort()).toEqual(allStates.sort());
   });
 });

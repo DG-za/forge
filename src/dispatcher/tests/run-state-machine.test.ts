@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { transitionRun, RUN_TRANSITIONS } from '../run-state-machine';
+import { describe, expect, it } from 'vitest';
 import { InvalidTransitionError } from '../invalid-transition.error';
+import { RUN_TRANSITIONS, transitionRun } from '../run-state-machine';
 import type { RunState } from '../state-machine.types';
 
 describe('transitionRun', () => {
@@ -25,27 +25,19 @@ describe('transitionRun', () => {
   });
 
   it('should reject pending → completed', () => {
-    expect(() => transitionRun('pending', 'completed')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionRun('pending', 'completed')).toThrow(InvalidTransitionError);
   });
 
   it('should reject pending → in_progress', () => {
-    expect(() => transitionRun('pending', 'in_progress')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionRun('pending', 'in_progress')).toThrow(InvalidTransitionError);
   });
 
   it('should reject completed → pending (terminal state)', () => {
-    expect(() => transitionRun('completed', 'pending')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionRun('completed', 'pending')).toThrow(InvalidTransitionError);
   });
 
   it('should reject failed → pending (terminal state)', () => {
-    expect(() => transitionRun('failed', 'pending')).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transitionRun('failed', 'pending')).toThrow(InvalidTransitionError);
   });
 
   it('should include entity and states in the error', () => {
@@ -71,13 +63,7 @@ describe('RUN_TRANSITIONS', () => {
   });
 
   it('should cover all RunState values', () => {
-    const allStates: RunState[] = [
-      'pending',
-      'planning',
-      'in_progress',
-      'completed',
-      'failed',
-    ];
+    const allStates: RunState[] = ['pending', 'planning', 'in_progress', 'completed', 'failed'];
     expect(Object.keys(RUN_TRANSITIONS).sort()).toEqual(allStates.sort());
   });
 });

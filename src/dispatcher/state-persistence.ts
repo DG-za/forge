@@ -1,13 +1,7 @@
 import type { PrismaClient } from '../../generated/prisma/client.js';
-import { transitionRun } from './run-state-machine';
 import { transitionIssue } from './issue-state-machine';
-import type {
-  RunState,
-  IssueState,
-  RunTransition,
-  IssueTransition,
-  StateChangeListener,
-} from './state-machine.types';
+import { transitionRun } from './run-state-machine';
+import type { IssueState, IssueTransition, RunState, RunTransition, StateChangeListener } from './state-machine.types';
 
 export async function persistRunTransition(
   prisma: PrismaClient,

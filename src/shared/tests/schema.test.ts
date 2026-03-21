@@ -1,8 +1,8 @@
-import { PrismaClient } from '../../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import pg from 'pg';
+import { PrismaClient } from '../../../generated/prisma/client.js';
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;
@@ -196,9 +196,36 @@ describe('Prisma schema', () => {
 
     await prisma.agentLog.createMany({
       data: [
-        { issueId: issue.id, role: 'coder', platform: 'claude', model: 'sonnet', inputTokens: 5000, outputTokens: 2000, costUsd: 0.045, durationMs: 10000 },
-        { issueId: issue.id, role: 'reviewer', platform: 'openai', model: 'gpt-5.3', inputTokens: 3000, outputTokens: 1000, costUsd: 0.024, durationMs: 8000 },
-        { issueId: issue.id, role: 'coder', platform: 'claude', model: 'sonnet', inputTokens: 2000, outputTokens: 1000, costUsd: 0.021, durationMs: 5000 },
+        {
+          issueId: issue.id,
+          role: 'coder',
+          platform: 'claude',
+          model: 'sonnet',
+          inputTokens: 5000,
+          outputTokens: 2000,
+          costUsd: 0.045,
+          durationMs: 10000,
+        },
+        {
+          issueId: issue.id,
+          role: 'reviewer',
+          platform: 'openai',
+          model: 'gpt-5.3',
+          inputTokens: 3000,
+          outputTokens: 1000,
+          costUsd: 0.024,
+          durationMs: 8000,
+        },
+        {
+          issueId: issue.id,
+          role: 'coder',
+          platform: 'claude',
+          model: 'sonnet',
+          inputTokens: 2000,
+          outputTokens: 1000,
+          costUsd: 0.021,
+          durationMs: 5000,
+        },
       ],
     });
 

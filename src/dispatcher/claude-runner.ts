@@ -1,10 +1,6 @@
-import { query } from '@anthropic-ai/claude-agent-sdk';
 import type { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
-import type {
-  AgentMessage,
-  AgentRunner,
-  RunOptions,
-} from './agent-runner.types';
+import { query } from '@anthropic-ai/claude-agent-sdk';
+import type { AgentMessage, AgentRunner, RunOptions } from './agent-runner.types';
 
 export class ClaudeRunner implements AgentRunner {
   readonly platform = 'claude' as const;
@@ -41,9 +37,7 @@ function normaliseMessage(message: SDKMessage): AgentMessage[] {
   return [];
 }
 
-function normaliseAssistant(
-  message: Extract<SDKMessage, { type: 'assistant' }>,
-): AgentMessage[] {
+function normaliseAssistant(message: Extract<SDKMessage, { type: 'assistant' }>): AgentMessage[] {
   const messages: AgentMessage[] = [];
   for (const block of message.message.content) {
     if (block.type === 'text') {
@@ -59,9 +53,7 @@ function normaliseAssistant(
   return messages;
 }
 
-function normaliseResult(
-  message: Extract<SDKMessage, { type: 'result' }>,
-): AgentMessage {
+function normaliseResult(message: Extract<SDKMessage, { type: 'result' }>): AgentMessage {
   const cost = {
     inputTokens: message.usage.input_tokens,
     outputTokens: message.usage.output_tokens,

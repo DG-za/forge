@@ -5,22 +5,9 @@
  * decoupled from the ORM and testable without a database.
  */
 
-export type RunState =
-  | 'pending'
-  | 'planning'
-  | 'in_progress'
-  | 'completed'
-  | 'failed';
+export type RunState = 'pending' | 'planning' | 'in_progress' | 'completed' | 'failed';
 
-export type IssueState =
-  | 'queued'
-  | 'coding'
-  | 'gates'
-  | 'reviewing'
-  | 'fixing'
-  | 'done'
-  | 'failed'
-  | 'escalated';
+export type IssueState = 'queued' | 'coding' | 'gates' | 'reviewing' | 'fixing' | 'done' | 'failed' | 'escalated';
 
 export type RunTransition = {
   runId: string;

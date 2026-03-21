@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AgentMessage } from '../agent-runner.types';
 
 vi.mock('@anthropic-ai/claude-agent-sdk', () => ({
@@ -55,9 +55,7 @@ describe('ClaudeRunner', () => {
         num_turns: 3,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
     const options = buildRunOptions();
@@ -96,14 +94,10 @@ describe('ClaudeRunner', () => {
         num_turns: 1,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Fix it', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Fix it', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'progress',
@@ -135,14 +129,10 @@ describe('ClaudeRunner', () => {
         num_turns: 1,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Read file', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Read file', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'tool_use',
@@ -176,14 +166,10 @@ describe('ClaudeRunner', () => {
         num_turns: 1,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Read file', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Read file', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'progress',
@@ -208,14 +194,10 @@ describe('ClaudeRunner', () => {
         num_turns: 5,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Run tests', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Run tests', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'result',
@@ -232,25 +214,21 @@ describe('ClaudeRunner', () => {
         type: 'result',
         subtype: 'error_max_turns',
         errors: ['Max turns exceeded'],
-        total_cost_usd: 0.50,
+        total_cost_usd: 0.5,
         usage: { input_tokens: 2000, output_tokens: 1000 },
         duration_ms: 10000,
         num_turns: 10,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Big task', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Big task', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'error',
       text: 'Max turns exceeded',
-      cost: { inputTokens: 2000, outputTokens: 1000, costUsd: 0.50 },
+      cost: { inputTokens: 2000, outputTokens: 1000, costUsd: 0.5 },
     });
   });
 
@@ -268,14 +246,10 @@ describe('ClaudeRunner', () => {
         num_turns: 1,
       },
     ];
-    mockedQuery.mockReturnValue(
-      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
-    );
+    mockedQuery.mockReturnValue(fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>);
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Quick task', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Quick task', buildRunOptions()));
 
     expect(messages).toHaveLength(1);
     expect(messages[0]!.type).toBe('result');

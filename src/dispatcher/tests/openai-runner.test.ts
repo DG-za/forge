@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AgentMessage } from '../agent-runner.types';
 
 const mockThread = { run: vi.fn() };
@@ -70,25 +70,18 @@ describe('OpenAIRunner', () => {
     const runner = buildRunner();
     await collectMessages(runner.run('Fix the bug', buildRunOptions()));
 
-    expect(mockThread.run).toHaveBeenCalledWith(
-      'You are a coding assistant.\n\nFix the bug',
-      expect.any(Object),
-    );
+    expect(mockThread.run).toHaveBeenCalledWith('You are a coding assistant.\n\nFix the bug', expect.any(Object));
   });
 
   it('should yield progress from agent_message items', async () => {
     mockThread.run.mockResolvedValue({
       finalResponse: 'Done',
-      items: [
-        { type: 'agent_message', id: '1', text: 'Looking at the code...' },
-      ],
+      items: [{ type: 'agent_message', id: '1', text: 'Looking at the code...' }],
       usage: { input_tokens: 100, output_tokens: 50, cached_input_tokens: 0 },
     });
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Fix it', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Fix it', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'progress',
@@ -113,9 +106,7 @@ describe('OpenAIRunner', () => {
     });
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Run tests', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Run tests', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'tool_use',
@@ -139,9 +130,7 @@ describe('OpenAIRunner', () => {
     });
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Edit file', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Edit file', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'tool_use',
@@ -158,9 +147,7 @@ describe('OpenAIRunner', () => {
     });
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Run tests', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Run tests', buildRunOptions()));
 
     const result = messages.find((m) => m.type === 'result');
     expect(result).toBeDefined();
@@ -178,9 +165,7 @@ describe('OpenAIRunner', () => {
     mockThread.run.mockRejectedValue(new Error('API rate limit'));
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Fail task', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Fail task', buildRunOptions()));
 
     expect(messages[0]).toEqual({
       type: 'error',
@@ -197,9 +182,7 @@ describe('OpenAIRunner', () => {
     });
 
     const runner = buildRunner();
-    const messages = await collectMessages(
-      runner.run('Quick task', buildRunOptions()),
-    );
+    const messages = await collectMessages(runner.run('Quick task', buildRunOptions()));
 
     const result = messages.find((m) => m.type === 'result');
     expect(result).toBeDefined();

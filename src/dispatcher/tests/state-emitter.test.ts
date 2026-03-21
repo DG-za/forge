@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createStateEmitter } from '../state-emitter';
 import type { StateChangeEvent } from '../state-machine.types';
 
