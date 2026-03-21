@@ -30,6 +30,7 @@
 - `IssueFetcher` interface abstracts issue sources. GitHub is one implementation — text files, Jira, etc. can plug in. Planner consumes `EpicContext`, not GitHub directly.
 - Three agent roles: Planner (strong reasoning model), Coder (cost-effective model, TDD), Reviewer (different vendor than Coder).
 - Planner output is Zod-validated JSON. Agent returns structured `Plan` with ordered `PlannedTask` items.
+- Coder uses `runCoder` with retry loop (default 7 attempts): agent codes → quality gates (lint, typecheck, tests) → fix prompt if failed. `CommandExecutor` injection for testable gate execution.
 - State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer.
 - Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client.js` (custom output path), not from `@prisma/client`.
 
