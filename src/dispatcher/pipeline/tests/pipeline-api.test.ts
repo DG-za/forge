@@ -167,3 +167,81 @@ describe('cancelRun', () => {
     expect(await api.cancelRun(runId)).toBe(true);
   });
 });
+
+const twoTaskPlan: Plan = {
+  summary: 'Two tasks.',
+  tasks: [
+    { issueNumber: 1, title: 'Task one', acceptanceCriteria: ['works'], dependencies: [], complexity: 'small' },
+    { issueNumber: 2, title: 'Task two', acceptanceCriteria: ['also works'], dependencies: [], complexity: 'small' },
+  ],
+};
+
+describe('resumeRun', () => {
+  it('should return false for unknown run ID', async () => {
+    const api = createPipelineApi(prisma);
+
+    expect(await api.resumeRun('nonexistent', testInput())).toBe(false);
+  });
+
+  it('should return false for a completed run', async () => {
+    const api = createPipelineApi(prisma);
+    const config: PipelineConfig = {
+      ...testConfig(),
+      planner: { runner: buildRunner('claude', [planResponse(singleTaskPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
+      coder: { runner: buildRunner('claude', [resultMessage('Coded')]), model: 'claude-sonnet' },
+      reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
+    };
+    const runId = await api.startRun({ config, issueFetcher: mockFetcher, getDiff: async () => '' });
+
+    await vi.waitFor(async () => {
+      const status = await api.getRunStatus(runId);
+      expect(status?.state).toBe('completed');
+    });
+
+    expect(await api.resumeRun(runId, testInput())).toBe(false);
+  });
+
+  it('should resume a partially completed run and finish remaining tasks', async () => {
+    const api = createPipelineApi(prisma);
+
+    // Seed a run that looks like it was interrupted after completing task 1
+    const run = await prisma.run.create({
+      data: { repo: 'owner/repo', epicNumber: 10, config: {}, status: 'in_progress', planSummary: 'Two tasks.' },
+    });
+    await prisma.planTask.createMany({
+      data: twoTaskPlan.tasks.map((t, i) => ({
+        runId: run.id,
+        orderIndex: i,
+        issueNumber: t.issueNumber ?? 0,
+        title: t.title,
+        acceptanceCriteria: t.acceptanceCriteria,
+        dependencies: t.dependencies,
+        complexity: t.complexity,
+      })),
+    });
+    await prisma.issue.create({
+      data: { runId: run.id, issueNumber: 1, title: 'Task one', status: 'done', costUsd: 0.05 },
+    });
+
+    // Resume — should pick up task 2 only
+    const resumeConfig: PipelineConfig = {
+      ...testConfig(),
+      planner: { runner: buildRunner('claude', [planResponse(emptyPlan)]), model: 'claude-opus' },
+      coder: { runner: buildRunner('claude', [resultMessage('Coded on resume')]), model: 'claude-sonnet' },
+      reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
+    };
+
+    const resumed = await api.resumeRun(run.id, { config: resumeConfig, issueFetcher: mockFetcher, getDiff: async () => '' });
+    expect(resumed).toBe(true);
+
+    await vi.waitFor(async () => {
+      const status = await api.getRunStatus(run.id);
+      expect(status?.state).toBe('completed');
+    });
+
+    const issues = await prisma.issue.findMany({ where: { runId: run.id }, orderBy: { issueNumber: 'asc' } });
+    expect(issues).toHaveLength(2);
+    expect(issues[0].issueNumber).toBe(1);
+    expect(issues[1].issueNumber).toBe(2);
+  });
+});
