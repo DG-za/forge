@@ -47,17 +47,11 @@ export type ErrorMessage = {
   cost: Cost;
 };
 
-export type CostMessage = {
-  type: 'cost';
-  cost: Cost;
-};
-
 export type AgentMessage =
   | ProgressMessage
   | ToolUseMessage
   | ResultMessage
-  | ErrorMessage
-  | CostMessage;
+  | ErrorMessage;
 
 export interface AgentRunner {
   readonly platform: Platform;

@@ -151,6 +151,51 @@ describe('ClaudeRunner', () => {
     });
   });
 
+  it('should yield all content blocks from a single assistant message', async () => {
+    const fakeMessages = [
+      {
+        type: 'assistant',
+        message: {
+          content: [
+            { type: 'text', text: 'Let me read that file.' },
+            {
+              type: 'tool_use',
+              name: 'Read',
+              input: { file_path: '/tmp/repo/src/main.ts' },
+            },
+          ],
+        },
+      },
+      {
+        type: 'result',
+        subtype: 'success',
+        result: 'Done',
+        total_cost_usd: 0.01,
+        usage: { input_tokens: 10, output_tokens: 5 },
+        duration_ms: 500,
+        num_turns: 1,
+      },
+    ];
+    mockedQuery.mockReturnValue(
+      fakeQueryGenerator(fakeMessages) as ReturnType<typeof query>,
+    );
+
+    const runner = buildRunner();
+    const messages = await collectMessages(
+      runner.run('Read file', buildRunOptions()),
+    );
+
+    expect(messages[0]).toEqual({
+      type: 'progress',
+      text: 'Let me read that file.',
+    });
+    expect(messages[1]).toEqual({
+      type: 'tool_use',
+      tool: 'Read',
+      input: JSON.stringify({ file_path: '/tmp/repo/src/main.ts' }),
+    });
+  });
+
   it('should yield a result message on success', async () => {
     const fakeMessages = [
       {

@@ -30,6 +30,8 @@ export class OpenAIRunner implements AgentRunner {
   }
 
   async *run(task: string, options: RunOptions): AsyncGenerator<AgentMessage> {
+    // TODO: Codex SDK doesn't support maxTurns, maxBudgetUsd, or allowedTools.
+    // Budget enforcement and turn limits must be tracked externally by the dispatcher.
     const codex = new Codex(this.codexOptions);
     const thread = codex.startThread({
       model: options.model,

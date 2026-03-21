@@ -25,36 +25,38 @@ export class ClaudeRunner implements AgentRunner {
     });
 
     for await (const message of conversation) {
-      const normalised = normaliseMessage(message);
-      if (normalised) yield normalised;
+      for (const normalised of normaliseMessage(message)) {
+        yield normalised;
+      }
     }
   }
 }
 
-function normaliseMessage(message: SDKMessage): AgentMessage | null {
+function normaliseMessage(message: SDKMessage): AgentMessage[] {
   if (message.type === 'assistant') {
     return normaliseAssistant(message);
   } else if (message.type === 'result') {
-    return normaliseResult(message);
+    return [normaliseResult(message)];
   }
-  return null;
+  return [];
 }
 
 function normaliseAssistant(
   message: Extract<SDKMessage, { type: 'assistant' }>,
-): AgentMessage | null {
+): AgentMessage[] {
+  const messages: AgentMessage[] = [];
   for (const block of message.message.content) {
     if (block.type === 'text') {
-      return { type: 'progress', text: block.text };
+      messages.push({ type: 'progress', text: block.text });
     } else if (block.type === 'tool_use') {
-      return {
+      messages.push({
         type: 'tool_use',
         tool: block.name,
         input: JSON.stringify(block.input),
-      };
+      });
     }
   }
-  return null;
+  return messages;
 }
 
 function normaliseResult(
