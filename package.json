@@ -16,6 +16,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.81",
+    "@openai/codex-sdk": "^0.116.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "dotenv": "^17.3.1",
@@ -29,7 +31,6 @@
     "@testcontainers/postgresql": "^11.13.0",
     "@types/node": "^22.13.14",
     "@types/pg": "8.11.11",
-    "prisma": "^7.5.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.22.0",
@@ -39,6 +40,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "prisma": "^7.5.0",
     "testcontainers": "^11.13.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0",
