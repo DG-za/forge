@@ -1,5 +1,7 @@
 export { persistPlan } from './persist-plan';
-export { PLANNER_SYSTEM_PROMPT, buildPlanPrompt, buildReplanPrompt } from './planner-prompt';
+export { buildPlanPrompt, buildReplanPrompt } from './planner-prompt';
+export { PLANNER_SYSTEM_PROMPT } from './planner-system-prompt';
+export { PlannerError } from './planner.error';
 export { PlanParseError, parsePlan } from './planner.schema';
 export type {
   CompletedIssue,

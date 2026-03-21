@@ -1,5 +1,7 @@
 import type { AgentRunner, Cost } from '../agent-runner.types';
-import { buildPlanPrompt, buildReplanPrompt, PLANNER_SYSTEM_PROMPT } from './planner-prompt';
+import { buildPlanPrompt, buildReplanPrompt } from './planner-prompt';
+import { PLANNER_SYSTEM_PROMPT } from './planner-system-prompt';
+import { PlannerError } from './planner.error';
 import { parsePlan } from './planner.schema';
 import type { EpicContext, Plan, ReplanContext } from './planner.types';
 
@@ -41,7 +43,7 @@ async function executePlanner(options: PlannerOptions, prompt: string): Promise<
 
   for await (const message of generator) {
     if (message.type === 'error') {
-      throw new Error(message.text);
+      throw new PlannerError(message.text, message.cost);
     }
     if (message.type === 'result') {
       return { plan: parsePlan(message.text), cost: message.cost };

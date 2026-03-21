@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AgentMessage, AgentRunner } from '../../agent-runner.types';
+import { PlannerError } from '../planner.error';
 import { PlanParseError } from '../planner.schema';
 import type { EpicContext, ReplanContext } from '../planner.types';
 import { replan, runPlanner } from '../run-planner';
@@ -94,12 +95,14 @@ describe('runPlanner', () => {
     await expect(runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 })).rejects.toThrow(PlanParseError);
   });
 
-  it('should throw when runner returns an error message', async () => {
+  it('should throw PlannerError with cost when runner returns an error message', async () => {
     const runner = buildMockRunner([errorMessage('Budget exceeded')]);
 
-    await expect(runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 })).rejects.toThrow(
-      'Budget exceeded',
-    );
+    const error = await runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 }).catch((e) => e);
+
+    expect(error).toBeInstanceOf(PlannerError);
+    expect(error.message).toBe('Budget exceeded');
+    expect(error.cost).toEqual({ inputTokens: 100, outputTokens: 0, costUsd: 0.01 });
   });
 });
 

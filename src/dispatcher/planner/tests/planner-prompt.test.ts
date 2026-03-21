@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildPlanPrompt, buildReplanPrompt, PLANNER_SYSTEM_PROMPT } from '../planner-prompt';
+import { buildPlanPrompt, buildReplanPrompt } from '../planner-prompt';
+import { PLANNER_SYSTEM_PROMPT } from '../planner-system-prompt';
 import type { EpicContext, ReplanContext } from '../planner.types';
 
 const epicContext: EpicContext = {
