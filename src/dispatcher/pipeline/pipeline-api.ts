@@ -1,6 +1,8 @@
+import type { PrismaClient } from '../../../generated/prisma/client.js';
 import type { IssueFetcher } from '../planner/planner.types';
 import type { PipelineConfig } from './pipeline.types';
-import { runPipeline, type FullPipelineResult } from './run-pipeline';
+import { computeResumeState, type ResumeState } from './resume-run';
+import { runPipeline } from './run-pipeline';
 
 type RunInput = {
   config: PipelineConfig;
@@ -8,52 +10,76 @@ type RunInput = {
   getDiff: () => Promise<string>;
 };
 
-type RunStatus = {
-  state: 'running' | 'completed' | 'failed';
-  result?: FullPipelineResult;
+export type RunStatus = {
+  state: 'running' | 'completed' | 'failed' | 'pending' | 'planning';
   error?: string;
 };
 
-type PipelineApi = {
-  startRun(input: RunInput): string;
-  getRunStatus(runId: string): RunStatus | null;
-  cancelRun(runId: string): boolean;
+export type PipelineApi = {
+  startRun(input: RunInput): Promise<string>;
+  getRunStatus(runId: string): Promise<RunStatus | null>;
+  cancelRun(runId: string): Promise<boolean>;
+  resumeRun(runId: string, input: RunInput): Promise<boolean>;
 };
 
-export function createPipelineApi(): PipelineApi {
-  const runs = new Map<string, { status: RunStatus; controller: AbortController }>();
-  let nextId = 1;
+export function createPipelineApi(prisma: PrismaClient): PipelineApi {
+  const controllers = new Map<string, AbortController>();
 
-  return { startRun, getRunStatus, cancelRun };
+  return { startRun, getRunStatus, cancelRun, resumeRun };
 
-  function startRun(input: RunInput): string {
-    const runId = `run-${nextId++}`;
-    const controller = new AbortController();
+  async function startRun(input: RunInput): Promise<string> {
+    const run = await prisma.run.create({
+      data: {
+        repo: input.config.repo,
+        epicNumber: input.config.epicNumber,
+        budgetUsd: input.config.maxBudgetUsd,
+        config: {},
+      },
+    });
 
-    runs.set(runId, { status: { state: 'running' }, controller });
-
-    runPipeline({ runId, ...input, signal: controller.signal })
-      .then((result) => {
-        const entry = runs.get(runId);
-        if (entry) entry.status = { state: 'completed', result };
-      })
-      .catch((error) => {
-        const entry = runs.get(runId);
-        if (entry) entry.status = { state: 'failed', error: String(error) };
-      });
-
-    return runId;
+    launchPipeline(run.id, input);
+    return run.id;
   }
 
-  function getRunStatus(runId: string): RunStatus | null {
-    return runs.get(runId)?.status ?? null;
+  async function getRunStatus(runId: string): Promise<RunStatus | null> {
+    const run = await prisma.run.findUnique({ where: { id: runId } });
+    if (!run) return null;
+
+    if (controllers.has(runId)) return { state: 'running' };
+    return { state: run.status as RunStatus['state'] };
   }
 
-  function cancelRun(runId: string): boolean {
-    const entry = runs.get(runId);
-    if (!entry) return false;
-    entry.controller.abort();
+  async function cancelRun(runId: string): Promise<boolean> {
+    const controller = controllers.get(runId);
+    if (!controller) return false;
+    controller.abort();
     return true;
   }
-}
 
+  async function resumeRun(runId: string, input: RunInput): Promise<boolean> {
+    const run = await prisma.run.findUnique({
+      where: { id: runId },
+      include: { issues: true, planTasks: { orderBy: { orderIndex: 'asc' } } },
+    });
+    if (!run || run.status === 'completed') return false;
+
+    const resumeState = computeResumeState({
+      planTasks: run.planTasks,
+      planSummary: run.planSummary,
+      issues: run.issues,
+    });
+
+    if (resumeState.remainingTasks.length === 0) return false;
+
+    launchPipeline(run.id, input, resumeState);
+    return true;
+  }
+
+  function launchPipeline(runId: string, input: RunInput, resumeState?: ResumeState): void {
+    const controller = new AbortController();
+    controllers.set(runId, controller);
+
+    runPipeline({ runId, ...input, signal: controller.signal, prisma, resumeState })
+      .finally(() => controllers.delete(runId));
+  }
+}

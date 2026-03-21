@@ -1,12 +1,13 @@
 import type { PrismaClient } from '../../../generated/prisma/client.js';
 import type { Cost } from '../agent-runner.types';
 import { addCost } from '../cost.utils';
-import type { IssueFetcher, Plan } from '../planner/planner.types';
+import type { IssueFetcher, Plan, PlannedTask } from '../planner/planner.types';
 import { runPlanner } from '../planner/run-planner';
 import type { RunState, StateChangeEvent, StateChangeListener } from '../state-machine.types';
 import { createPipelinePersistence, type PipelinePersistence } from './pipeline-persistence';
 import type { IssueOutcome, PipelineConfig, PipelineResult } from './pipeline.types';
 import { processIssue } from './process-issue';
+import type { ResumeState } from './resume-run';
 import { tryReplan } from './try-replan';
 
 export type RunPipelineOptions = {
@@ -16,40 +17,47 @@ export type RunPipelineOptions = {
   getDiff: () => Promise<string>;
   signal?: AbortSignal;
   prisma?: PrismaClient;
+  resumeState?: ResumeState;
 };
 
 export type FullPipelineResult = PipelineResult & { plan: Plan };
 
 export async function runPipeline(options: RunPipelineOptions): Promise<FullPipelineResult> {
-  const { runId, config, issueFetcher, signal } = options;
+  const { runId, config, issueFetcher, signal, resumeState } = options;
   const emit = buildEmitter(config.onStateChange);
   const db = options.prisma ? createPipelinePersistence(options.prisma, runId, config.onStateChange) : null;
-  let totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
-  const outcomes: IssueOutcome[] = [];
-
-  await transitionRun(db, emit, runId, 'pending', 'planning');
+  let totalCost: Cost = resumeState?.startingCost ?? { inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  const outcomes: IssueOutcome[] = [...(resumeState?.completedOutcomes ?? [])];
 
   const epicContext = await issueFetcher.fetchEpic(config.repo, config.epicNumber);
 
   let plan: Plan;
-  try {
-    const planResult = await runPlanner({
-      runner: config.planner.runner,
-      model: config.planner.model,
-      epicContext,
-      maxBudgetUsd: config.maxBudgetUsd,
-    });
-    totalCost = addCost(totalCost, planResult.cost);
-    plan = planResult.plan;
-    await db?.savePlan(plan);
-  } catch {
-    await transitionRun(db, emit, runId, 'planning', 'failed');
-    return { runId, totalCost, outcomes, plan: { tasks: [], summary: '' }, ...counters(outcomes) };
+  let remainingTasks: PlannedTask[];
+
+  if (resumeState) {
+    plan = resumeState.initialPlan;
+    remainingTasks = [...resumeState.remainingTasks];
+  } else {
+    await transitionRun(db, emit, runId, 'pending', 'planning');
+
+    try {
+      const planResult = await runPlanner({
+        runner: config.planner.runner,
+        model: config.planner.model,
+        epicContext,
+        maxBudgetUsd: config.maxBudgetUsd,
+      });
+      totalCost = addCost(totalCost, planResult.cost);
+      plan = planResult.plan;
+      await db?.savePlan(plan);
+    } catch {
+      await transitionRun(db, emit, runId, 'planning', 'failed');
+      return { runId, totalCost, outcomes, plan: { tasks: [], summary: '' }, ...counters(outcomes) };
+    }
+
+    await transitionRun(db, emit, runId, 'planning', 'in_progress');
+    remainingTasks = [...plan.tasks];
   }
-
-  await transitionRun(db, emit, runId, 'planning', 'in_progress');
-
-  let remainingTasks = [...plan.tasks];
 
   while (remainingTasks.length > 0) {
     if (signal?.aborted) break;
