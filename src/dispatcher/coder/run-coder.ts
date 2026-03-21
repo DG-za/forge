@@ -21,11 +21,9 @@ type CoderOptions = {
 
 export async function runCoder(options: CoderOptions): Promise<CoderResult> {
   const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
-  const totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  let currentCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   let prompt = buildCoderPrompt(options.task);
   let gateResult: QualityGateResult = { passed: false, gates: [] };
-
-  let currentCost = totalCost;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const cost = await executeAgent(options, prompt);
     currentCost = addCost(currentCost, cost);

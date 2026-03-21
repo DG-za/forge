@@ -23,6 +23,10 @@
 - **Testing:** Strict TDD — write tests first, then implement. Applies to all Forge code and to worker agents dispatched by Forge. No implementation before tests. See `PROJECT.md` for the full workflow and `docs/decisions/003-tdd-testing-strategy.md` for rationale.
 - **Local-first:** Everything runs locally via Docker Compose. Tests use Testcontainers for Postgres (no DB mocks). Only mock LLM APIs (expensive/external). See `PROJECT.md` for full rules.
 
+## Design Philosophy
+
+- **File size is a smell, not a rule.** The real concern is single responsibility and consistent abstraction level. A module should operate at one level of abstraction — don't mix high-level orchestration with low-level details. If a module does that, refactor regardless of LOC. If a module has one clear purpose at one abstraction level, it can exceed 150 lines with justification.
+
 ## Patterns and Conventions
 
 - Dispatcher logic lives in `src/dispatcher/` as a pure library — no HTTP concerns. Web layer calls into it.

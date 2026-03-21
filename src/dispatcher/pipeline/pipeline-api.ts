@@ -45,8 +45,9 @@ export function createPipelineApi(prisma: PrismaClient): PipelineApi {
     const run = await prisma.run.findUnique({ where: { id: runId } });
     if (!run) return null;
 
-    if (controllers.has(runId)) return { state: 'running' };
-    return { state: run.status as RunStatus['state'] };
+    const isTerminal = run.status === 'completed' || run.status === 'failed';
+    if (controllers.has(runId) && !isTerminal) return { state: 'running' };
+    return { state: run.status === 'in_progress' ? 'running' : run.status as RunStatus['state'] };
   }
 
   async function cancelRun(runId: string): Promise<boolean> {
@@ -80,6 +81,10 @@ export function createPipelineApi(prisma: PrismaClient): PipelineApi {
     controllers.set(runId, controller);
 
     runPipeline({ runId, ...input, signal: controller.signal, prisma, resumeState })
+      .catch((err) => {
+        console.error(`Pipeline ${runId} failed:`, err);
+        prisma.run.update({ where: { id: runId }, data: { status: 'failed' } }).catch(() => {});
+      })
       .finally(() => controllers.delete(runId));
   }
 }
