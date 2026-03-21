@@ -1,6 +1,7 @@
 import type { AgentRunner, Cost } from '../agent-runner.types';
 import type { CommandExecutor, QualityGateConfig } from '../coder/coder.types';
 import { runQualityGates } from '../coder/quality-gates';
+import { addCost } from '../cost.utils';
 import { assertCrossModel } from './cross-model';
 import { buildReviewFixPrompt, buildReviewPrompt } from './reviewer-prompt';
 import { REVIEWER_SYSTEM_PROMPT } from './reviewer-system-prompt';
@@ -98,12 +99,4 @@ async function executeCoder(options: ReviewerOptions, feedback: ReviewFeedback):
   }
 
   throw new Error('Coder agent returned no result during review fix');
-}
-
-function addCost(a: Cost, b: Cost): Cost {
-  return {
-    inputTokens: a.inputTokens + b.inputTokens,
-    outputTokens: a.outputTokens + b.outputTokens,
-    costUsd: a.costUsd + b.costUsd,
-  };
 }

@@ -1,4 +1,5 @@
 import type { AgentRunner, Cost } from '../agent-runner.types';
+import { addCost } from '../cost.utils';
 import { buildCoderPrompt, buildFixPrompt } from './coder-prompt';
 import { CODER_SYSTEM_PROMPT } from './coder-system-prompt';
 import { CoderError } from './coder.error';
@@ -20,21 +21,20 @@ type CoderOptions = {
 
 export async function runCoder(options: CoderOptions): Promise<CoderResult> {
   const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
-  const totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  let currentCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   let prompt = buildCoderPrompt(options.task);
   let gateResult: QualityGateResult = { passed: false, gates: [] };
-
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const cost = await executeAgent(options, prompt);
-    addCost(totalCost, cost);
+    currentCost = addCost(currentCost, cost);
 
     gateResult = await runQualityGates(options.gateConfig, options.cwd, options.exec);
-    if (gateResult.passed) return { cost: totalCost, gatesPassed: true, attempts: attempt };
+    if (gateResult.passed) return { cost: currentCost, gatesPassed: true, attempts: attempt };
 
     prompt = buildFixPrompt(gateResult);
   }
 
-  return { cost: totalCost, gatesPassed: false, attempts: maxAttempts };
+  return { cost: currentCost, gatesPassed: false, attempts: maxAttempts };
 }
 
 async function executeAgent(options: CoderOptions, prompt: string): Promise<Cost> {
@@ -53,10 +53,4 @@ async function executeAgent(options: CoderOptions, prompt: string): Promise<Cost
   }
 
   throw new Error('Coder agent returned no result');
-}
-
-function addCost(total: Cost, addition: Cost): void {
-  total.inputTokens += addition.inputTokens;
-  total.outputTokens += addition.outputTokens;
-  total.costUsd += addition.costUsd;
 }

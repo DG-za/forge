@@ -33,16 +33,18 @@ enum AgentRole {
 }
 
 model Run {
-  id         String     @id @default(cuid())
-  repo       String
-  epicNumber Int
-  status     RunStatus  @default(pending)
-  budgetUsd  Float?
-  config     Json
-  issues     Issue[]
-  planTasks  PlanTask[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id           String     @id @default(cuid())
+  repo         String
+  epicNumber   Int
+  status       RunStatus  @default(pending)
+  budgetUsd    Float?
+  totalCostUsd Float      @default(0)
+  planSummary  String?
+  config       Json
+  issues       Issue[]
+  planTasks    PlanTask[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Issue {
@@ -70,6 +72,7 @@ model PlanTask {
   acceptanceCriteria String[]
   dependencies       Int[]
   complexity         String
+  planVersion        Int      @default(1)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
