@@ -9,6 +9,7 @@ export { InvalidTransitionError } from './invalid-transition.error';
 export { ISSUE_TRANSITIONS, transitionIssue } from './issue-state-machine';
 export { OpenAIRunner } from './openai-runner';
 export * from './planner';
+export * from './reviewer';
 export { RUN_TRANSITIONS, transitionRun } from './run-state-machine';
 export { createStateEmitter, type StateEmitter } from './state-emitter';
 export type {
