@@ -21,8 +21,16 @@ export type IssueTransition = {
   to: IssueState;
 };
 
+export type BudgetWarning = {
+  runId: string;
+  currentCostUsd: number;
+  budgetUsd: number;
+  percentUsed: number;
+};
+
 export type StateChangeEvent =
   | { kind: 'run'; transition: RunTransition }
-  | { kind: 'issue'; transition: IssueTransition };
+  | { kind: 'issue'; transition: IssueTransition }
+  | { kind: 'budget_warning'; warning: BudgetWarning };
 
 export type StateChangeListener = (event: StateChangeEvent) => void;

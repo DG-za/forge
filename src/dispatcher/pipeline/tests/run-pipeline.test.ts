@@ -73,7 +73,14 @@ function baseConfig(overrides: Partial<PipelineConfig> = {}): PipelineConfig {
   return {
     repo: 'owner/repo',
     epicNumber: 10,
-    planner: { runner: buildRunner('claude', [planResponse(simplePlan), planResponse(remainingAfterFirstPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
+    planner: {
+      runner: buildRunner('claude', [
+        planResponse(simplePlan),
+        planResponse(remainingAfterFirstPlan),
+        planResponse(emptyPlan),
+      ]),
+      model: 'claude-opus',
+    },
     coder: { runner: buildRunner('claude', [resultMessage('Coded')]), model: 'claude-sonnet' },
     reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
     gateConfig: { lintCommand: 'lint', typecheckCommand: 'tsc', testCommand: 'test' },
@@ -115,9 +122,7 @@ describe('runPipeline', () => {
       return { exitCode: 0, output: '' };
     };
 
-    const result = await runPipeline(
-      baseOptions({ config: baseConfig({ exec: failFirstIssueExec }) }),
-    );
+    const result = await runPipeline(baseOptions({ config: baseConfig({ exec: failFirstIssueExec }) }));
 
     expect(result.outcomes[0].status).toBe('failed');
     expect(result.outcomes[1].status).toBe('done');
@@ -131,9 +136,7 @@ describe('runPipeline', () => {
       model: 'gpt-4o',
     };
 
-    const result = await runPipeline(
-      baseOptions({ config: baseConfig({ reviewer }) }),
-    );
+    const result = await runPipeline(baseOptions({ config: baseConfig({ reviewer }) }));
 
     expect(result.outcomes[0].status).toBe('escalated');
     expect(result.escalatedCount).toBeGreaterThanOrEqual(1);
@@ -221,7 +224,9 @@ describe('runPipeline', () => {
   it('should emit state changes via onStateChange callback', async () => {
     const events: string[] = [];
     const config = baseConfig({
-      onStateChange: (event) => events.push(`${event.kind}:${event.transition.to}`),
+      onStateChange: (event) => {
+        if (event.kind === 'run') events.push(`${event.kind}:${event.transition.to}`);
+      },
     });
 
     await runPipeline(baseOptions({ config }));
@@ -265,7 +270,13 @@ describe('runPipeline — re-planning', () => {
     const revisedPlan: Plan = {
       summary: 'Revised after task one.',
       tasks: [
-        { issueNumber: 99, title: 'New task from replan', acceptanceCriteria: ['new'], dependencies: [], complexity: 'small' },
+        {
+          issueNumber: 99,
+          title: 'New task from replan',
+          acceptanceCriteria: ['new'],
+          dependencies: [],
+          complexity: 'small',
+        },
       ],
     };
 
@@ -311,7 +322,9 @@ describe('runPipeline — re-planning', () => {
   it('should not replan after the last issue', async () => {
     const singleTaskPlan: Plan = {
       summary: 'One task only.',
-      tasks: [{ issueNumber: 1, title: 'Only task', acceptanceCriteria: ['works'], dependencies: [], complexity: 'small' }],
+      tasks: [
+        { issueNumber: 1, title: 'Only task', acceptanceCriteria: ['works'], dependencies: [], complexity: 'small' },
+      ],
     };
 
     const plannerSpy = vi.fn(async function* () {
@@ -341,7 +354,63 @@ describe('runPipeline — re-planning', () => {
     const result = await runPipeline(baseOptions({ config }));
 
     // 1 initial plan + 1 replan after issue 1 = 2 × $0.05 = $0.10 planner cost
-    expect(result.totalCost.costUsd).toBeGreaterThanOrEqual(0.10);
+    expect(result.totalCost.costUsd).toBeGreaterThanOrEqual(0.1);
     expect(result.totalCost.inputTokens).toBeGreaterThanOrEqual(1000);
+  });
+});
+
+describe('runPipeline — budget warning', () => {
+  it('should emit budget_warning when cost crosses 80% of budget', async () => {
+    const events: Array<{ kind: string; threshold?: number }> = [];
+    const expensiveCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 9 };
+    const config = baseConfig({
+      coder: { runner: buildRunner('claude', [resultMessage('Coded', expensiveCost)]), model: 'claude-sonnet' },
+      maxBudgetUsd: 20,
+      onStateChange: (event) => {
+        if (event.kind === 'budget_warning') events.push(event);
+      },
+    });
+
+    await runPipeline(baseOptions({ config }));
+
+    // First issue coder costs $9 (45%), reviewer ~$0 (45%) — no warning
+    // Second issue coder costs $9 (90%) — warning emitted
+    expect(events).toHaveLength(1);
+    expect(events[0].kind).toBe('budget_warning');
+  });
+
+  it('should emit budget_warning only once per run', async () => {
+    const warningCount: string[] = [];
+    // $5 per issue × 2 issues = $10. 80% of $10 = $8.
+    // After issue 1: $5 (50%) — no warning
+    // After issue 2: $10 (100%) — warning fires. Only once.
+    const issueCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 5 };
+    const config = baseConfig({
+      coder: { runner: buildRunner('claude', [resultMessage('Coded', issueCost)]), model: 'claude-sonnet' },
+      maxBudgetUsd: 10,
+      onStateChange: (event) => {
+        if (event.kind === 'budget_warning') warningCount.push('warned');
+      },
+    });
+
+    await runPipeline(baseOptions({ config }));
+
+    expect(warningCount).toHaveLength(1);
+  });
+
+  it('should not emit budget_warning when cost stays below 80%', async () => {
+    const warnings: string[] = [];
+    const cheapCost: Cost = { inputTokens: 10, outputTokens: 5, costUsd: 0.001 };
+    const config = baseConfig({
+      coder: { runner: buildRunner('claude', [resultMessage('Coded', cheapCost)]), model: 'claude-sonnet' },
+      maxBudgetUsd: 50,
+      onStateChange: (event) => {
+        if (event.kind === 'budget_warning') warnings.push('warned');
+      },
+    });
+
+    await runPipeline(baseOptions({ config }));
+
+    expect(warnings).toHaveLength(0);
   });
 });

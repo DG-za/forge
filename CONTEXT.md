@@ -41,7 +41,8 @@
 - Resume after restart: `computeResumeState` is a pure function that reconstructs `ResumeState` from persisted DB rows (plan tasks, completed issues, costs). Pipeline skips planning on resume and picks up from the next incomplete task. `PipelinePersistence` wraps all Prisma calls for run state, plan saving, and issue tracking.
 - Persistence is optional via `prisma?` parameter — unit tests work without a database, integration tests use Testcontainers.
 - Shared `addCost` utility in `cost.utils.ts` — pure function for accumulating `Cost` values (used by coder, reviewer, pipeline).
-- State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer.
+- Cost tracking: `AgentLog` records persisted per agent invocation (role, platform, model, tokens, cost, duration). `processIssue` uses `onAgentComplete` callback to report coder/reviewer completions. Planner log attached to first issue. `BudgetWarning` event emitted via `StateChangeListener` at 80% budget (once per run).
+- State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer. `StateChangeEvent` supports `run`, `issue`, and `budget_warning` kinds.
 - Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client.js` (custom output path), not from `@prisma/client`.
 
 ## References

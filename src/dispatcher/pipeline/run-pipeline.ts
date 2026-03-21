@@ -22,12 +22,15 @@ export type RunPipelineOptions = {
 
 export type FullPipelineResult = PipelineResult & { plan: Plan };
 
+const BUDGET_WARNING_THRESHOLD = 0.8;
+
 export async function runPipeline(options: RunPipelineOptions): Promise<FullPipelineResult> {
   const { runId, config, issueFetcher, signal, resumeState } = options;
   const emit = buildEmitter(config.onStateChange);
   const db = options.prisma ? createPipelinePersistence(options.prisma, runId, config.onStateChange) : null;
   let totalCost: Cost = resumeState?.startingCost ?? { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   const outcomes: IssueOutcome[] = [...(resumeState?.completedOutcomes ?? [])];
+  let budgetWarningEmitted = false;
 
   const epicContext = await issueFetcher.fetchEpic(config.repo, config.epicNumber);
 
@@ -67,6 +70,18 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     const remainingBudget = config.maxBudgetUsd - totalCost.costUsd;
     const issueId = await db?.createIssue(task);
 
+    // Write planner AgentLog for initial plan (once, on first issue)
+    if (!resumeState && outcomes.length === 0 && issueId) {
+      await db?.createAgentLog({
+        issueId,
+        role: 'planner',
+        platform: config.planner.runner.platform,
+        model: config.planner.model,
+        cost: totalCost,
+        durationMs: 0,
+      });
+    }
+
     try {
       const outcome = await processIssue({
         task: {
@@ -82,6 +97,11 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
         maxBudgetUsd: remainingBudget,
         exec: config.exec,
         getDiff: options.getDiff,
+        onAgentComplete: issueId
+          ? async (event) => {
+              await db?.createAgentLog({ issueId, ...event });
+            }
+          : undefined,
       });
 
       totalCost = addCost(totalCost, outcome.cost);
@@ -98,6 +118,7 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     }
 
     await db?.updateTotalCost(totalCost);
+    budgetWarningEmitted = checkBudgetWarning(emit, runId, totalCost, config.maxBudgetUsd, budgetWarningEmitted);
 
     if (remainingTasks.length > 0) {
       const replanResult = await tryReplan(config, epicContext, plan, outcomes);
@@ -121,6 +142,25 @@ function counters(outcomes: IssueOutcome[]) {
     failedCount: outcomes.filter((o) => o.status === 'failed').length,
     escalatedCount: outcomes.filter((o) => o.status === 'escalated').length,
   };
+}
+
+function checkBudgetWarning(
+  emit: (event: StateChangeEvent) => void,
+  runId: string,
+  totalCost: Cost,
+  maxBudgetUsd: number,
+  alreadyEmitted: boolean,
+): boolean {
+  if (alreadyEmitted) return true;
+  const percentUsed = totalCost.costUsd / maxBudgetUsd;
+  if (percentUsed >= BUDGET_WARNING_THRESHOLD) {
+    emit({
+      kind: 'budget_warning',
+      warning: { runId, currentCostUsd: totalCost.costUsd, budgetUsd: maxBudgetUsd, percentUsed },
+    });
+    return true;
+  }
+  return false;
 }
 
 async function transitionRun(
