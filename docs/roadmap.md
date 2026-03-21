@@ -1,33 +1,24 @@
 # Roadmap 🗺️
 
-**Last updated:** 2026-03-21
+**Last updated:** 2026-03-22
 
 ## Current Phase
-
-### Phase 2: Core Engine ⚙️
-
-**Epic:** #15
-**Status:** in progress — 0/8 issues done
-
-Build the core autonomous pipeline. Issues in dependency order:
-
-1. #21 — Prisma + Postgres schema
-2. #22 — AgentRunner abstraction (Claude + OpenAI)
-3. #23 — Dispatcher state machine
-4. #24 — Planner agent
-5. #25 — Coder agent (TDD + quality gates)
-6. #26 — Reviewer agent (cross-model review + fix loop)
-7. #27 — Cost tracking and budget enforcement
-8. #28 — Pipeline orchestrator (end-to-end flow)
-
-## Upcoming Phases
 
 ### Phase 3: Web UI 📲
 
 **Epic:** #16
-**Status:** not started — sub-issues will be created when this phase begins
+**Status:** in progress — 0/6 issues done
 
-Mobile-first web dashboard for triggering runs, monitoring progress, and reviewing results. Makes Forge usable from a phone before advanced features are added. Next.js App Router, server components for data, minimal client interactivity.
+Mobile-first web dashboard for triggering runs, monitoring progress, and reviewing results. Issues in dependency order:
+
+1. #40 — Tailwind CSS + layout shell
+2. #41 — Server actions for pipeline data
+3. #42 — Dashboard — run list page
+4. #43 — Start run form
+5. #44 — Run detail page
+6. #45 — Live status polling
+
+## Upcoming Phases
 
 ### Phase 4: AI Chat + MCPs 💬
 
@@ -58,6 +49,13 @@ Dockerize the full stack, deploy to the home server, and run a live smoke test a
 When workers create PRs on target repos, automatically deploy a preview so you can see the running app before merging. Convention-based (Dockerfile or framework auto-detection). Accessible at `forge.dgza.co.za/preview/{run_id}`, torn down on merge/close.
 
 ## Completed Phases
+
+### Phase 2: Core Engine ⚙️
+
+**Epic:** #15
+**Status:** core complete — 8/8 pipeline issues closed
+
+Built the full autonomous pipeline: AgentRunner abstraction, state machine, Planner → Coder → Reviewer flow, cost tracking with budget enforcement, and pipeline orchestrator with resume support. Three non-blocking polish issues remain open (#31 model pricing to DB, #33 audit logging, #34 optimistic concurrency).
 
 ### Phase 1: Foundation 🧱
 
