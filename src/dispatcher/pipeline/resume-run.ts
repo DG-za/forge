@@ -42,17 +42,16 @@ export function computeResumeState(run: PersistedRun): ResumeState {
     cost: { inputTokens: i.inputTokens, outputTokens: i.outputTokens, costUsd: i.costUsd },
   }));
 
-  const startingCost = completedOutcomes.reduce(
-    (total, o) => addCost(total, o.cost),
-    { inputTokens: 0, outputTokens: 0, costUsd: 0 },
-  );
+  const startingCost = completedOutcomes.reduce((total, o) => addCost(total, o.cost), {
+    inputTokens: 0,
+    outputTokens: 0,
+    costUsd: 0,
+  });
 
   const sortedTasks = [...run.planTasks].sort((a, b) => a.orderIndex - b.orderIndex);
   const allTasks: PlannedTask[] = sortedTasks.map(toPlannedTask);
 
-  const remainingTasks = sortedTasks
-    .filter((t) => !completedNumbers.has(t.issueNumber ?? -1))
-    .map(toPlannedTask);
+  const remainingTasks = sortedTasks.filter((t) => !completedNumbers.has(t.issueNumber ?? -1)).map(toPlannedTask);
 
   return {
     startingCost,

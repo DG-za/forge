@@ -47,7 +47,7 @@ export function createPipelineApi(prisma: PrismaClient): PipelineApi {
 
     const isTerminal = run.status === 'completed' || run.status === 'failed';
     if (controllers.has(runId) && !isTerminal) return { state: 'running' };
-    return { state: run.status === 'in_progress' ? 'running' : run.status as RunStatus['state'] };
+    return { state: run.status === 'in_progress' ? 'running' : (run.status as RunStatus['state']) };
   }
 
   async function cancelRun(runId: string): Promise<boolean> {

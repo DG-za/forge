@@ -29,6 +29,7 @@ export async function processIssue(options: ProcessIssueOptions): Promise<IssueO
   let totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   const issueNumber = options.task.issueNumber ?? 0;
 
+  const coderStart = Date.now();
   const coderResult = await runCoder({
     runner: options.coder.runner,
     model: options.coder.model,
@@ -44,7 +45,7 @@ export async function processIssue(options: ProcessIssueOptions): Promise<IssueO
     platform: options.coder.runner.platform,
     model: options.coder.model,
     cost: coderResult.cost,
-    durationMs: 0,
+    durationMs: Date.now() - coderStart,
   });
 
   if (!coderResult.gatesPassed) {
@@ -54,6 +55,7 @@ export async function processIssue(options: ProcessIssueOptions): Promise<IssueO
   const diff = await options.getDiff();
   const remainingBudget = options.maxBudgetUsd - totalCost.costUsd;
 
+  const reviewerStart = Date.now();
   const reviewResult = await runReviewer({
     reviewerRunner: options.reviewer.runner,
     coderRunner: options.coder.runner,
@@ -76,7 +78,7 @@ export async function processIssue(options: ProcessIssueOptions): Promise<IssueO
     platform: options.reviewer.runner.platform,
     model: options.reviewer.model,
     cost: reviewResult.cost,
-    durationMs: 0,
+    durationMs: Date.now() - reviewerStart,
   });
 
   if (reviewResult.escalated) {

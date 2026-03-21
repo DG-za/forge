@@ -7,8 +7,8 @@ import { PrismaClient } from '../../../../generated/prisma/client.js';
 import type { AgentMessage, AgentRunner, Cost } from '../../agent-runner.types';
 import type { CommandExecutor } from '../../coder/coder.types';
 import type { IssueFetcher, Plan } from '../../planner/planner.types';
-import type { PipelineConfig } from '../pipeline.types';
 import { createPipelineApi } from '../pipeline-api';
+import type { PipelineConfig } from '../pipeline.types';
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;
@@ -140,9 +140,15 @@ describe('getRunStatus', () => {
     const api = createPipelineApi(prisma);
     const completingConfig: PipelineConfig = {
       ...testConfig(),
-      planner: { runner: buildRunner('claude', [planResponse(singleTaskPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
+      planner: {
+        runner: buildRunner('claude', [planResponse(singleTaskPlan), planResponse(emptyPlan)]),
+        model: 'claude-opus',
+      },
       coder: { runner: buildRunner('claude', [resultMessage('Coded')]), model: 'claude-sonnet' },
-      reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
+      reviewer: {
+        runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]),
+        model: 'gpt-4o',
+      },
     };
     const runId = await api.startRun({ config: completingConfig, issueFetcher: mockFetcher, getDiff: async () => '' });
 
@@ -187,9 +193,15 @@ describe('resumeRun', () => {
     const api = createPipelineApi(prisma);
     const config: PipelineConfig = {
       ...testConfig(),
-      planner: { runner: buildRunner('claude', [planResponse(singleTaskPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
+      planner: {
+        runner: buildRunner('claude', [planResponse(singleTaskPlan), planResponse(emptyPlan)]),
+        model: 'claude-opus',
+      },
       coder: { runner: buildRunner('claude', [resultMessage('Coded')]), model: 'claude-sonnet' },
-      reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
+      reviewer: {
+        runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]),
+        model: 'gpt-4o',
+      },
     };
     const runId = await api.startRun({ config, issueFetcher: mockFetcher, getDiff: async () => '' });
 
@@ -228,10 +240,17 @@ describe('resumeRun', () => {
       ...testConfig(),
       planner: { runner: buildRunner('claude', [planResponse(emptyPlan)]), model: 'claude-opus' },
       coder: { runner: buildRunner('claude', [resultMessage('Coded on resume')]), model: 'claude-sonnet' },
-      reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]), model: 'gpt-4o' },
+      reviewer: {
+        runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```')]),
+        model: 'gpt-4o',
+      },
     };
 
-    const resumed = await api.resumeRun(run.id, { config: resumeConfig, issueFetcher: mockFetcher, getDiff: async () => '' });
+    const resumed = await api.resumeRun(run.id, {
+      config: resumeConfig,
+      issueFetcher: mockFetcher,
+      getDiff: async () => '',
+    });
     expect(resumed).toBe(true);
 
     await vi.waitFor(async () => {

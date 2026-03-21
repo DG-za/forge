@@ -18,9 +18,7 @@ export async function tryReplan(
       replanContext: {
         originalPlan,
         completedIssues: toCompletedIssues(outcomes),
-        remainingIssues: epicContext.issues.filter(
-          (i) => !outcomes.some((o) => o.issueNumber === i.number),
-        ),
+        remainingIssues: epicContext.issues.filter((i) => !outcomes.some((o) => o.issueNumber === i.number)),
       },
     });
     return { tasks: result.plan.tasks, cost: result.cost };

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AgentMessage, AgentRunner, Cost } from '../../agent-runner.types';
-import type { CommandExecutor } from '../../coder/coder.types';
-import type { CoderTask } from '../../coder/coder.types';
+import type { CoderTask, CommandExecutor } from '../../coder/coder.types';
 import type { ReviewFeedback } from '../../reviewer/reviewer.types';
 import { processIssue, type ProcessIssueOptions } from '../process-issue';
 

@@ -37,6 +37,9 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
   let plan: Plan;
   let remainingTasks: PlannedTask[];
 
+  let plannerCost: Cost | undefined;
+  let plannerDurationMs = 0;
+
   if (resumeState) {
     plan = resumeState.initialPlan;
     remainingTasks = [...resumeState.remainingTasks];
@@ -44,12 +47,15 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     await transitionRun(db, emit, runId, 'pending', 'planning');
 
     try {
+      const plannerStart = Date.now();
       const planResult = await runPlanner({
         runner: config.planner.runner,
         model: config.planner.model,
         epicContext,
         maxBudgetUsd: config.maxBudgetUsd,
       });
+      plannerCost = planResult.cost;
+      plannerDurationMs = Date.now() - plannerStart;
       totalCost = addCost(totalCost, planResult.cost);
       plan = planResult.plan;
       await db?.savePlan(plan);
@@ -71,14 +77,14 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     const issueId = await db?.createIssue(task);
 
     // Write planner AgentLog for initial plan (once, on first issue)
-    if (!resumeState && outcomes.length === 0 && issueId) {
+    if (plannerCost && outcomes.length === 0 && issueId) {
       await db?.createAgentLog({
         issueId,
         role: 'planner',
         platform: config.planner.runner.platform,
         model: config.planner.model,
-        cost: totalCost,
-        durationMs: 0,
+        cost: plannerCost,
+        durationMs: plannerDurationMs,
       });
     }
 
