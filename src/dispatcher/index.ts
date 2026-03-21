@@ -6,6 +6,7 @@ export type { AgentMessage, AgentRunner, Cost, Platform, RunOptions } from './ag
 export { ClaudeRunner } from './claude-runner';
 export * from './coder';
 export { InvalidTransitionError } from './invalid-transition.error';
+export * from './pipeline';
 export { ISSUE_TRANSITIONS, transitionIssue } from './issue-state-machine';
 export { OpenAIRunner } from './openai-runner';
 export * from './planner';
