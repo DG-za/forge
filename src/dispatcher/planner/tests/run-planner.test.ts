@@ -23,6 +23,7 @@ const epicContext: EpicContext = {
   epicTitle: 'Core Engine',
   epicBody: 'Build the dispatcher.',
   issues: [{ number: 42, title: 'Login', body: 'Add login.', labels: [], state: 'open' }],
+  repoIssues: [],
 };
 
 function buildMockRunner(messages: AgentMessage[]): AgentRunner {

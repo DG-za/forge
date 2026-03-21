@@ -21,6 +21,7 @@ Schema:
 Rules:
 - Order tasks by dependency (dependencies first) then by complexity (smaller first).
 - Use existing issue numbers where applicable. Set issueNumber to null for new suggested tasks.
+- If a repo issue already covers a planned task, reference it by number instead of creating a duplicate.
 - Keep acceptance criteria specific and testable.
 - "small" = under 100 lines, "medium" = 100-300, "large" = 300+.`;
 
@@ -39,7 +40,7 @@ ${context.epicBody}
 
 ${issueList}
 
-Produce a plan covering all open issues. Include closed issues in dependency references but don't re-plan them.`;
+Produce a plan covering all open issues. Include closed issues in dependency references but don't re-plan them.${buildRepoIssuesSection(context)}`;
 }
 
 export function buildReplanPrompt(context: EpicContext, replanContext: ReplanContext): string {
@@ -68,4 +69,20 @@ ${completedList}
 ${remainingList}
 
 Produce a revised plan for the remaining work only. Adjust order, scope, or add tasks based on what was learned.`;
+}
+
+function buildRepoIssuesSection(context: EpicContext): string {
+  if (context.repoIssues.length === 0) return '';
+
+  const repoIssueList = context.repoIssues
+    .map((i) => `- #${i.number}: ${i.title} [${i.state}]\n  ${i.body}`)
+    .join('\n');
+
+  return `
+
+## Other open issues in this repo
+
+Check for overlap — if an existing issue covers a planned task, reference it instead of duplicating.
+
+${repoIssueList}`;
 }

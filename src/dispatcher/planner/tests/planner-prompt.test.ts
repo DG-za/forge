@@ -23,6 +23,15 @@ const epicContext: EpicContext = {
       state: 'closed',
     },
   ],
+  repoIssues: [
+    {
+      number: 50,
+      title: 'Add JWT authentication',
+      body: 'Implement JWT-based auth for API routes.',
+      labels: ['feature'],
+      state: 'open',
+    },
+  ],
 };
 
 describe('PLANNER_SYSTEM_PROMPT', () => {
@@ -60,6 +69,20 @@ describe('buildPlanPrompt', () => {
 
     expect(prompt).toContain('Decompose this epic');
     expect(prompt).toContain('ordered plan');
+  });
+
+  it('should include repo issues for overlap detection', () => {
+    const prompt = buildPlanPrompt(epicContext);
+
+    expect(prompt).toContain('#50');
+    expect(prompt).toContain('Add JWT authentication');
+  });
+
+  it('should omit repo issues section when none exist', () => {
+    const contextWithoutRepoIssues: EpicContext = { ...epicContext, repoIssues: [] };
+    const prompt = buildPlanPrompt(contextWithoutRepoIssues);
+
+    expect(prompt).not.toContain('Other open issues');
   });
 });
 

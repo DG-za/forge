@@ -19,6 +19,7 @@ export type EpicContext = {
   epicTitle: string;
   epicBody: string;
   issues: EpicIssue[];
+  repoIssues: EpicIssue[];
 };
 
 export type EpicIssue = {
