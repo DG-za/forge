@@ -211,6 +211,38 @@ describe('runReviewer', () => {
     expect(result.escalated).toBe(false);
   });
 
+  it('should retry coder when quality gates fail after fix', async () => {
+    let reviewCall = 0;
+    const reviewerRunner: AgentRunner = {
+      platform: 'openai',
+      async *run() {
+        reviewCall++;
+        if (reviewCall === 1) yield jsonResponse(changesFeedback);
+        else yield jsonResponse(approvalFeedback);
+      },
+    };
+
+    const coderSpy = vi.fn(async function* () {
+      yield resultMessage('Fixed');
+    });
+    const coderRunner: AgentRunner = { platform: 'claude', run: coderSpy };
+
+    const failOnceExec: CommandExecutor = vi.fn(async (command: string) => {
+      // First lint call fails, everything else passes
+      if (command === 'npm run lint' && (failOnceExec as ReturnType<typeof vi.fn>).mock.calls.length <= 3) {
+        return { exitCode: 1, output: 'Lint error: unused var' };
+      }
+      return { exitCode: 0, output: '' };
+    });
+
+    await runReviewer(baseOptions({ reviewerRunner, coderRunner, exec: failOnceExec }));
+
+    // Coder called twice: once for review fix, once for gate failure retry
+    expect(coderSpy).toHaveBeenCalledTimes(2);
+    const retryPrompt = coderSpy.mock.calls[1][0] as string;
+    expect(retryPrompt).toContain('Quality gates failed');
+  });
+
   it('should pass reviewer model and cwd to the reviewer runner', async () => {
     const runSpy = vi.fn(async function* () {
       yield jsonResponse(approvalFeedback);

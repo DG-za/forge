@@ -27,13 +27,13 @@ export async function runReviewer(options: ReviewerOptions): Promise<ReviewResul
   assertCrossModel(options.coderRunner.platform, options.reviewerRunner.platform);
 
   const maxIterations = options.maxIterations ?? DEFAULT_MAX_ITERATIONS;
-  const totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  let totalCost: Cost = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
   let feedback: ReviewFeedback = { verdict: 'request_changes', summary: '', issues: [] };
 
   for (let iteration = 1; iteration <= maxIterations; iteration++) {
-    const reviewCost = await executeReviewer(options);
-    addCost(totalCost, reviewCost.cost);
-    feedback = reviewCost.feedback;
+    const reviewResult = await executeReviewer(options);
+    totalCost = addCost(totalCost, reviewResult.cost);
+    feedback = reviewResult.feedback;
 
     if (feedback.verdict === 'approve') {
       return { cost: totalCost, feedback, iterations: iteration, escalated: false };
@@ -41,8 +41,21 @@ export async function runReviewer(options: ReviewerOptions): Promise<ReviewResul
 
     if (iteration < maxIterations) {
       const fixCost = await executeCoder(options, feedback);
-      addCost(totalCost, fixCost);
-      await runQualityGates(options.gateConfig, options.cwd, options.exec);
+      totalCost = addCost(totalCost, fixCost);
+
+      const gateResult = await runQualityGates(options.gateConfig, options.cwd, options.exec);
+      if (!gateResult.passed) {
+        const gateOutput = gateResult.gates
+          .filter((g) => !g.passed)
+          .map((g) => `${g.gate}: ${g.output}`)
+          .join('\n');
+        const retryCost = await executeCoder(options, {
+          verdict: 'request_changes',
+          summary: 'Quality gates failed after your fix. Fix the failures below.',
+          issues: [{ file: '', line: null, description: gateOutput, severity: 'critical' }],
+        });
+        totalCost = addCost(totalCost, retryCost);
+      }
     }
   }
 
@@ -87,8 +100,10 @@ async function executeCoder(options: ReviewerOptions, feedback: ReviewFeedback):
   throw new Error('Coder agent returned no result during review fix');
 }
 
-function addCost(total: Cost, addition: Cost): void {
-  total.inputTokens += addition.inputTokens;
-  total.outputTokens += addition.outputTokens;
-  total.costUsd += addition.costUsd;
+function addCost(a: Cost, b: Cost): Cost {
+  return {
+    inputTokens: a.inputTokens + b.inputTokens,
+    outputTokens: a.outputTokens + b.outputTokens,
+    costUsd: a.costUsd + b.costUsd,
+  };
 }
