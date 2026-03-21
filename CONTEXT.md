@@ -31,6 +31,7 @@
 - Three agent roles: Planner (strong reasoning model), Coder (cost-effective model, TDD), Reviewer (different vendor than Coder).
 - Planner output is Zod-validated JSON. Agent returns structured `Plan` with ordered `PlannedTask` items.
 - Coder uses `runCoder` with retry loop (default 7 attempts): agent codes → quality gates (lint, typecheck, tests) → fix prompt if failed. `CommandExecutor` injection for testable gate execution.
+- Reviewer uses `runReviewer` with review-fix loop (default 4 iterations): reviewer agent → Zod-validated structured feedback (`ReviewFeedback`) → if request_changes, coder fixes → quality gates → re-review. `assertCrossModel` guard enforces different vendor for coder vs reviewer. Escalates after max iterations.
 - State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer.
 - Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client.js` (custom output path), not from `@prisma/client`.
 
