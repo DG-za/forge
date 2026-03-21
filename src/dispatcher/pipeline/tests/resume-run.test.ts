@@ -89,7 +89,7 @@ describe('computeResumeState', () => {
     const run = buildRun({
       issues: [
         buildIssue({ issueNumber: 1, status: 'done', costUsd: 0.05, inputTokens: 100, outputTokens: 50 }),
-        buildIssue({ issueNumber: 2, status: 'escalated', costUsd: 0.10, inputTokens: 200, outputTokens: 100 }),
+        buildIssue({ issueNumber: 2, status: 'escalated', costUsd: 0.1, inputTokens: 200, outputTokens: 100 }),
       ],
     });
 

@@ -86,9 +86,15 @@ function testConfig(overrides: Partial<PipelineConfig> = {}): PipelineConfig {
   return {
     repo: 'owner/repo',
     epicNumber: 10,
-    planner: { runner: buildRunner('claude', [planResponse(simplePlan), planResponse(remainingPlan), planResponse(emptyPlan)]), model: 'claude-opus' },
+    planner: {
+      runner: buildRunner('claude', [planResponse(simplePlan), planResponse(remainingPlan), planResponse(emptyPlan)]),
+      model: 'claude-opus',
+    },
     coder: { runner: buildRunner('claude', [resultMessage('Coded', smallCost)]), model: 'claude-sonnet' },
-    reviewer: { runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```', smallCost)]), model: 'gpt-4o' },
+    reviewer: {
+      runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```', smallCost)]),
+      model: 'gpt-4o',
+    },
     gateConfig: { lintCommand: 'lint', typecheckCommand: 'tsc', testCommand: 'test' },
     cwd: '/repo',
     maxBudgetUsd: 50,
@@ -198,5 +204,62 @@ describe('runPipeline with persistence', () => {
 
     const updated = await prisma.run.findUniqueOrThrow({ where: { id: run.id } });
     expect(updated.planSummary).toBe('Two tasks.');
+  });
+
+  it('should write AgentLog records for planner, coder, and reviewer', async () => {
+    const planCost: Cost = { inputTokens: 500, outputTokens: 200, costUsd: 0.05 };
+    const coderCost: Cost = { inputTokens: 100, outputTokens: 50, costUsd: 0.01 };
+    const reviewerCost: Cost = { inputTokens: 200, outputTokens: 100, costUsd: 0.02 };
+
+    const singleTaskPlan: Plan = {
+      summary: 'One task.',
+      tasks: [
+        { issueNumber: 1, title: 'Task one', acceptanceCriteria: ['works'], dependencies: [], complexity: 'small' },
+      ],
+    };
+
+    const run = await createTestRun();
+    await runPipeline({
+      runId: run.id,
+      config: testConfig({
+        planner: {
+          runner: buildRunner('claude', [planResponse(singleTaskPlan, planCost), planResponse(emptyPlan)]),
+          model: 'claude-opus',
+        },
+        coder: { runner: buildRunner('claude', [resultMessage('Coded', coderCost)]), model: 'claude-sonnet' },
+        reviewer: {
+          runner: buildRunner('openai', [resultMessage('```json\n' + approvalJson + '\n```', reviewerCost)]),
+          model: 'gpt-4o',
+        },
+      }),
+      issueFetcher: mockFetcher,
+      getDiff: async () => 'diff',
+      prisma,
+    });
+
+    const logs = await prisma.agentLog.findMany({
+      where: { issue: { runId: run.id } },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const plannerLogs = logs.filter((l) => l.role === 'planner');
+    const coderLogs = logs.filter((l) => l.role === 'coder');
+    const reviewerLogs = logs.filter((l) => l.role === 'reviewer');
+
+    expect(plannerLogs).toHaveLength(1);
+    expect(plannerLogs[0].platform).toBe('claude');
+    expect(plannerLogs[0].model).toBe('claude-opus');
+    expect(plannerLogs[0].costUsd).toBe(0.05);
+    expect(plannerLogs[0].inputTokens).toBe(500);
+
+    expect(coderLogs).toHaveLength(1);
+    expect(coderLogs[0].platform).toBe('claude');
+    expect(coderLogs[0].model).toBe('claude-sonnet');
+    expect(coderLogs[0].costUsd).toBe(0.01);
+
+    expect(reviewerLogs).toHaveLength(1);
+    expect(reviewerLogs[0].platform).toBe('openai');
+    expect(reviewerLogs[0].model).toBe('gpt-4o');
+    expect(reviewerLogs[0].costUsd).toBe(0.02);
   });
 });

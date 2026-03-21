@@ -1,11 +1,21 @@
 import type { PrismaClient } from '../../../generated/prisma/client.js';
-import type { Cost } from '../agent-runner.types';
+import type { Cost, Platform } from '../agent-runner.types';
 import { persistPlan } from '../planner/persist-plan';
 import type { Plan, PlannedTask } from '../planner/planner.types';
-import { persistRunTransition } from '../state-persistence';
 import type { RunState, StateChangeListener } from '../state-machine.types';
+import { persistRunTransition } from '../state-persistence';
 
 type IssueStatus = 'done' | 'failed' | 'escalated';
+type AgentRole = 'planner' | 'coder' | 'reviewer';
+
+export type AgentLogEntry = {
+  issueId: string;
+  role: AgentRole;
+  platform: Platform;
+  model: string;
+  cost: Cost;
+  durationMs: number;
+};
 
 export type PipelinePersistence = {
   transitionRun(to: RunState): Promise<void>;
@@ -13,6 +23,7 @@ export type PipelinePersistence = {
   createIssue(task: PlannedTask): Promise<string>;
   completeIssue(issueId: string, status: IssueStatus, cost: Cost): Promise<void>;
   updateTotalCost(totalCost: Cost): Promise<void>;
+  createAgentLog(entry: AgentLogEntry): Promise<void>;
 };
 
 export function createPipelinePersistence(
@@ -57,6 +68,21 @@ export function createPipelinePersistence(
       await prisma.run.update({
         where: { id: runId },
         data: { totalCostUsd: totalCost.costUsd },
+      });
+    },
+
+    async createAgentLog(entry) {
+      await prisma.agentLog.create({
+        data: {
+          issueId: entry.issueId,
+          role: entry.role,
+          platform: entry.platform,
+          model: entry.model,
+          inputTokens: entry.cost.inputTokens,
+          outputTokens: entry.cost.outputTokens,
+          costUsd: entry.cost.costUsd,
+          durationMs: entry.durationMs,
+        },
       });
     },
   };
