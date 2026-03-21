@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { buildPlanPrompt, buildReplanPrompt, PLANNER_SYSTEM_PROMPT } from '../planner-prompt';
 import type { EpicContext, ReplanContext } from '../planner.types';
 
@@ -77,9 +77,7 @@ describe('buildReplanPrompt', () => {
         },
       ],
     },
-    completedIssues: [
-      { issueNumber: 22, outcome: 'done', notes: 'Merged successfully' },
-    ],
+    completedIssues: [{ issueNumber: 22, outcome: 'done', notes: 'Merged successfully' }],
     remainingIssues: [epicContext.issues[1]],
   };
 

@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { runPlanner, replan } from '../run-planner';
-import { PlanParseError } from '../planner.schema';
+import { describe, expect, it, vi } from 'vitest';
 import type { AgentMessage, AgentRunner } from '../../agent-runner.types';
+import { PlanParseError } from '../planner.schema';
 import type { EpicContext, ReplanContext } from '../planner.types';
+import { replan, runPlanner } from '../run-planner';
 
 const validPlanJson = JSON.stringify({
   summary: 'Build auth module',
@@ -22,9 +22,7 @@ const epicContext: EpicContext = {
   epicNumber: 15,
   epicTitle: 'Core Engine',
   epicBody: 'Build the dispatcher.',
-  issues: [
-    { number: 42, title: 'Login', body: 'Add login.', labels: [], state: 'open' },
-  ],
+  issues: [{ number: 42, title: 'Login', body: 'Add login.', labels: [], state: 'open' }],
 };
 
 function buildMockRunner(messages: AgentMessage[]): AgentRunner {
@@ -92,17 +90,15 @@ describe('runPlanner', () => {
   it('should throw PlanParseError when agent output is invalid', async () => {
     const runner = buildMockRunner([resultMessage('not json')]);
 
-    await expect(
-      runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 }),
-    ).rejects.toThrow(PlanParseError);
+    await expect(runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 })).rejects.toThrow(PlanParseError);
   });
 
   it('should throw when runner returns an error message', async () => {
     const runner = buildMockRunner([errorMessage('Budget exceeded')]);
 
-    await expect(
-      runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 }),
-    ).rejects.toThrow('Budget exceeded');
+    await expect(runPlanner({ runner, model: 'test', epicContext, maxBudgetUsd: 5 })).rejects.toThrow(
+      'Budget exceeded',
+    );
   });
 });
 

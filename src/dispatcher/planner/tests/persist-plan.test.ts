@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { PrismaClient } from '../../../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import pg from 'pg';
-import { persistPlan } from '../persist-plan';
+import { describe, expect, it } from 'vitest';
+import { PrismaClient } from '../../../../generated/prisma/client.js';
 import { createRun } from '../../tests/factories';
+import { persistPlan } from '../persist-plan';
 import type { Plan } from '../planner.types';
 
 let container: StartedPostgreSqlContainer;

@@ -7,6 +7,7 @@ export { ClaudeRunner } from './claude-runner';
 export { InvalidTransitionError } from './invalid-transition.error';
 export { ISSUE_TRANSITIONS, transitionIssue } from './issue-state-machine';
 export { OpenAIRunner } from './openai-runner';
+export * from './planner';
 export { RUN_TRANSITIONS, transitionRun } from './run-state-machine';
 export { createStateEmitter, type StateEmitter } from './state-emitter';
 export type {

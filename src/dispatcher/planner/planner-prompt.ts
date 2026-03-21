@@ -26,10 +26,7 @@ Rules:
 
 export function buildPlanPrompt(context: EpicContext): string {
   const issueList = context.issues
-    .map(
-      (i) =>
-        `- #${i.number}: ${i.title} [${i.state}]\n  ${i.body}\n  Labels: ${i.labels.join(', ') || 'none'}`,
-    )
+    .map((i) => `- #${i.number}: ${i.title} [${i.state}]\n  ${i.body}\n  Labels: ${i.labels.join(', ') || 'none'}`)
     .join('\n');
 
   return `Decompose this epic into an ordered plan of tasks.
@@ -50,9 +47,7 @@ export function buildReplanPrompt(context: EpicContext, replanContext: ReplanCon
     .map((i) => `- #${i.issueNumber}: ${i.outcome} — ${i.notes}`)
     .join('\n');
 
-  const remainingList = replanContext.remainingIssues
-    .map((i) => `- #${i.number}: ${i.title}\n  ${i.body}`)
-    .join('\n');
+  const remainingList = replanContext.remainingIssues.map((i) => `- #${i.number}: ${i.title}\n  ${i.body}`).join('\n');
 
   return `Re-evaluate the remaining tasks for this epic based on what has been completed.
 
