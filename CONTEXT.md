@@ -32,7 +32,11 @@
 - Planner output is Zod-validated JSON. Agent returns structured `Plan` with ordered `PlannedTask` items.
 - Coder uses `runCoder` with retry loop (default 7 attempts): agent codes → quality gates (lint, typecheck, tests) → fix prompt if failed. `CommandExecutor` injection for testable gate execution.
 - Reviewer uses `runReviewer` with review-fix loop (default 4 iterations): reviewer agent → Zod-validated structured feedback (`ReviewFeedback`) → if request_changes, coder fixes → quality gates → re-review. `assertCrossModel` guard enforces different vendor for coder vs reviewer. Escalates after max iterations.
-- Pipeline orchestrator uses `runPipeline` to drive the full flow: plan → process each issue (code → review) → budget check → complete. `processIssue` is a pure function chaining coder and reviewer. `createPipelineApi` provides `startRun`/`getRunStatus`/`cancelRun` for the web layer. AbortSignal for cancellation between issues.
+- Pipeline orchestrator uses `runPipeline` to drive the full flow: plan → process each issue (code → review) → replan → budget check → complete. `processIssue` is a pure function chaining coder and reviewer. `createPipelineApi` provides `startRun`/`getRunStatus`/`cancelRun`/`resumeRun` for the web layer. AbortSignal for cancellation between issues.
+- Re-planning: after each completed issue, `tryReplan` calls the planner to revise remaining tasks based on outcomes so far. Non-fatal — returns null on failure and continues with original plan.
+- Resume after restart: `computeResumeState` is a pure function that reconstructs `ResumeState` from persisted DB rows (plan tasks, completed issues, costs). Pipeline skips planning on resume and picks up from the next incomplete task. `PipelinePersistence` wraps all Prisma calls for run state, plan saving, and issue tracking.
+- Persistence is optional via `prisma?` parameter — unit tests work without a database, integration tests use Testcontainers.
+- Shared `addCost` utility in `cost.utils.ts` — pure function for accumulating `Cost` values (used by coder, reviewer, pipeline).
 - State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer.
 - Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client.js` (custom output path), not from `@prisma/client`.
 
