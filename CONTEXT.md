@@ -8,7 +8,7 @@
 
 ## Work Mode
 
-`autonomous` — AI creates a plan, then implements immediately. PRs are created but never merged without approval.
+`manual` — AI creates a plan and waits for approval before implementing.
 
 ## Key Decisions
 
