@@ -37,6 +37,41 @@ describe('getStatusConfig', () => {
     expect(config.colorClass).toContain('red');
   });
 
+  it('should return gray for queued', () => {
+    expect(getStatusConfig('queued').label).toBe('Queued');
+    expect(getStatusConfig('queued').colorClass).toContain('gray');
+  });
+
+  it('should return blue for coding', () => {
+    expect(getStatusConfig('coding').label).toBe('Coding');
+    expect(getStatusConfig('coding').colorClass).toContain('blue');
+  });
+
+  it('should return blue for gates', () => {
+    expect(getStatusConfig('gates').label).toBe('Gates');
+    expect(getStatusConfig('gates').colorClass).toContain('blue');
+  });
+
+  it('should return purple for reviewing', () => {
+    expect(getStatusConfig('reviewing').label).toBe('Reviewing');
+    expect(getStatusConfig('reviewing').colorClass).toContain('purple');
+  });
+
+  it('should return yellow for fixing', () => {
+    expect(getStatusConfig('fixing').label).toBe('Fixing');
+    expect(getStatusConfig('fixing').colorClass).toContain('yellow');
+  });
+
+  it('should return green for done', () => {
+    expect(getStatusConfig('done').label).toBe('Done');
+    expect(getStatusConfig('done').colorClass).toContain('green');
+  });
+
+  it('should return red for escalated', () => {
+    expect(getStatusConfig('escalated').label).toBe('Escalated');
+    expect(getStatusConfig('escalated').colorClass).toContain('red');
+  });
+
   it('should return gray fallback for unknown status', () => {
     const config = getStatusConfig('something_else');
 
