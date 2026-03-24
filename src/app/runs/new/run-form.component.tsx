@@ -83,9 +83,8 @@ export function RunForm({ action }: Props) {
             id="repoBasePath"
             name="repoBasePath"
             type="text"
-            required
             defaultValue={DEFAULT_REPO_BASE_PATH}
-            placeholder="/repos"
+            placeholder="/repos (leave empty to skip worker mode)"
           />
           <p className="text-muted-foreground mt-1 text-xs">Local directory where repos are cloned</p>
         </div>

@@ -14,7 +14,6 @@ const validGates = {
   lintCommand: 'npm run lint',
   typecheckCommand: 'npm run typecheck',
   testCommand: 'npm test',
-  repoBasePath: '/repos',
 };
 
 const validInput = { repo: 'owner/repo', epicNumber: 42, budgetUsd: 25, ...validRoles, ...validGates };

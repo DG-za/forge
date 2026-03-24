@@ -34,5 +34,11 @@ function buildPrBody(task: CoderTask): string {
 }
 
 function quote(str: string): string {
-  return `"${str.replace(/"/g, '\\"')}"`;
+  const escaped = str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, '\\$')
+    .replace(/`/g, '\\`')
+    .replace(/!/g, '\\!');
+  return `"${escaped}"`;
 }

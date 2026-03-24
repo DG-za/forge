@@ -4,6 +4,7 @@ import { addCost } from '../cost.utils';
 import type { IssueFetcher, Plan, PlannedTask } from '../planner/planner.types';
 import { runPlanner } from '../planner/run-planner';
 import type { RunState, StateChangeEvent, StateChangeListener } from '../state-machine.types';
+import type { AgentCompleteEvent } from './process-issue';
 import { createPipelinePersistence, type PipelinePersistence } from './pipeline-persistence';
 import { runWorker } from '../worker/run-worker';
 import type { IssueOutcome, PipelineConfig, PipelineResult } from './pipeline.types';
@@ -97,7 +98,7 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
         acceptanceCriteria: task.acceptanceCriteria,
       };
       const onAgentComplete = issueId
-        ? async (event: { role: string; platform: string; model: string; cost: Cost; durationMs: number }) => {
+        ? async (event: AgentCompleteEvent) => {
             await db?.createAgentLog({ issueId, ...event });
           }
         : undefined;

@@ -31,5 +31,5 @@ export async function cleanupWorktree(
 ): Promise<void> {
   await exec(`git worktree remove ${worktreePath} --force`, repoDir);
   await exec(`git worktree prune`, repoDir);
-  await exec(`git branch -D ${branch}`, repoDir);
+  await exec(`git branch -d ${branch}`, repoDir);
 }

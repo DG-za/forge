@@ -25,7 +25,6 @@ const validRoleFields = {
   lintCommand: 'npm run lint',
   typecheckCommand: 'npm run typecheck',
   testCommand: 'npm test',
-  repoBasePath: '/repos',
 };
 
 function formData(entries: Record<string, string>): FormData {

@@ -70,7 +70,7 @@ describe('cleanupWorktree', () => {
 
     const removeCall = calls.find((c) => c.command.includes('git worktree remove'));
     expect(removeCall).toBeDefined();
-    const branchCall = calls.find((c) => c.command.includes('git branch -D'));
+    const branchCall = calls.find((c) => c.command.includes('git branch -d'));
     expect(branchCall?.command).toContain('feature/42-add-auth');
   });
 

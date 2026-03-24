@@ -32,7 +32,7 @@ export const buildRunInput: RunInputBuilder = (input): RunInput => {
         testCommand: input.testCommand,
       },
       cwd,
-      repoBasePath: input.repoBasePath,
+      repoBasePath: input.repoBasePath || undefined,
       exec: shellExec,
     },
     issueFetcher: new GithubIssueFetcher(),

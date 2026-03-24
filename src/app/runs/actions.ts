@@ -27,7 +27,7 @@ export async function startRun(
     lintCommand: formData.get('lintCommand'),
     typecheckCommand: formData.get('typecheckCommand'),
     testCommand: formData.get('testCommand'),
-    repoBasePath: formData.get('repoBasePath'),
+    repoBasePath: formData.get('repoBasePath') || undefined,
   });
 
   if (!parsed.success) {

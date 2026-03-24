@@ -19,7 +19,10 @@ export const startRunSchema = z
     lintCommand: z.string().min(1, 'Lint command is required'),
     typecheckCommand: z.string().min(1, 'Typecheck command is required'),
     testCommand: z.string().min(1, 'Test command is required'),
-    repoBasePath: z.string().min(1, 'Repo base path is required'),
+    repoBasePath: z
+      .string()
+      .regex(/^[a-zA-Z0-9/_.-]+$/, 'Repo base path contains invalid characters')
+      .optional(),
   })
   .refine((data) => data.reviewerPlatform !== data.coderPlatform, {
     message: 'Reviewer must use a different platform than coder for cross-model review',

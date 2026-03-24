@@ -81,4 +81,23 @@ describe('buildRunInput', () => {
 
     expect(typeof result.config.exec).toBe('function');
   });
+
+  it('should set repoBasePath when provided', () => {
+    const result = buildRunInput(validInput);
+
+    expect(result.config.repoBasePath).toBe('/repos');
+  });
+
+  it('should set repoBasePath to undefined when empty string', () => {
+    const result = buildRunInput({ ...validInput, repoBasePath: '' });
+
+    expect(result.config.repoBasePath).toBeUndefined();
+  });
+
+  it('should set repoBasePath to undefined when omitted', () => {
+    const { repoBasePath: _, ...inputWithout } = validInput;
+    const result = buildRunInput(inputWithout);
+
+    expect(result.config.repoBasePath).toBeUndefined();
+  });
 });
