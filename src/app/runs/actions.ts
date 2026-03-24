@@ -1,5 +1,3 @@
-'use server';
-
 import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
 import type { ActionResult } from './runs.types';
 import type { StartRunInput } from './validation';

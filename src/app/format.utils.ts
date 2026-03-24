@@ -2,6 +2,7 @@ const MINUTE = 60;
 const HOUR = 3_600;
 const DAY = 86_400;
 
+// Server-only: `now` defaults to request time. Would cause hydration mismatch in a Client Component.
 export function formatRelativeTime(date: Date, now = new Date()): string {
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1_000);
 
