@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { startRunSchema } from './validation';
+import { startRunSchema } from './run.validation';
 
 const validRoles = {
   plannerPlatform: 'claude',
@@ -37,7 +37,13 @@ describe('startRunSchema', () => {
   });
 
   it('should coerce string numbers', () => {
-    const result = startRunSchema.safeParse({ ...validRoles, ...validGates, repo: 'owner/repo', epicNumber: '10', budgetUsd: '5.50' });
+    const result = startRunSchema.safeParse({
+      ...validRoles,
+      ...validGates,
+      repo: 'owner/repo',
+      epicNumber: '10',
+      budgetUsd: '5.50',
+    });
 
     expect(result.success).toBe(true);
     expect(result.data).toMatchObject({ repo: 'owner/repo', epicNumber: 10, budgetUsd: 5.5 });

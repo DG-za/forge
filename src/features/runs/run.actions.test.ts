@@ -1,6 +1,6 @@
 import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
 import { describe, expect, it, vi } from 'vitest';
-import { cancelRun, startRun, type RunInputBuilder } from './actions';
+import { cancelRun, startRun, type RunInputBuilder } from './run.actions';
 
 function buildMockApi(overrides: Partial<PipelineApi> = {}): PipelineApi {
   return {

@@ -12,7 +12,9 @@ vi.mock('../repo-manager', () => ({
 }));
 
 vi.mock('../worktree', () => ({
-  createWorktree: vi.fn().mockResolvedValue({ ok: true, worktreePath: '/repos/owner/repo/.worktrees/feature/42-add-auth' }),
+  createWorktree: vi
+    .fn()
+    .mockResolvedValue({ ok: true, worktreePath: '/repos/owner/repo/.worktrees/feature/42-add-auth' }),
   cleanupWorktree: vi.fn().mockResolvedValue(undefined),
 }));
 

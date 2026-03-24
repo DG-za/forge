@@ -3,7 +3,7 @@ import { ClaudeRunner } from '@/dispatcher/claude-runner';
 import { OpenAIRunner } from '@/dispatcher/openai-runner';
 import type { RunInput } from '@/dispatcher/pipeline/pipeline-api';
 import type { RoleConfig } from '@/dispatcher/pipeline/pipeline.types';
-import type { RunInputBuilder } from '../actions';
+import type { RunInputBuilder } from '../run.actions';
 import { GithubIssueFetcher } from './github-issue-fetcher';
 import { shellExec } from './shell-exec';
 

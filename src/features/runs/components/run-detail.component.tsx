@@ -1,14 +1,14 @@
 'use client';
 
-import { formatCost } from '@/app/format.utils';
-import { StatusBadge } from '@/app/status-badge.component';
-import { useRunEvents } from '@/app/use-run-events.hook';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { StatusBadge } from '@/features/runs/components/status-badge.component';
+import { formatCost } from '@/features/runs/format.utils';
+import { useRunEvents } from '@/features/runs/use-run-events.hook';
 import { useState, useTransition } from 'react';
-import type { RunDetail } from '../runs.types';
-import { TERMINAL_RUN_STATUSES } from '../runs.types';
-import { cancelRunAction } from './cancel-run.action';
+import { cancelRunAction } from '../cancel-run.action';
+import type { RunDetail } from '../run.types';
+import { TERMINAL_RUN_STATUSES } from '../run.types';
 import { IssueCard } from './issue-card.component';
 import { PlanTaskList } from './plan-task-list.component';
 

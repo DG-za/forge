@@ -20,12 +20,7 @@ async function pullLatest(repo: string, repoDir: string, exec: CommandExecutor):
   return { ok: true, repoDir };
 }
 
-async function cloneRepo(
-  repo: string,
-  basePath: string,
-  repoDir: string,
-  exec: CommandExecutor,
-): Promise<RepoResult> {
+async function cloneRepo(repo: string, basePath: string, repoDir: string, exec: CommandExecutor): Promise<RepoResult> {
   const ownerDir = `${basePath}/${repo.split('/')[0]}`;
   await exec(`mkdir -p ${ownerDir}`, '.');
 

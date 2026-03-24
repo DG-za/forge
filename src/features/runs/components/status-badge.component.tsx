@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { getStatusConfig } from './status-badge.utils';
+import { getStatusConfig } from '../status-badge.utils';
 
 export function StatusBadge({ status }: { status: string }) {
   const { label, colorClass } = getStatusConfig(status);

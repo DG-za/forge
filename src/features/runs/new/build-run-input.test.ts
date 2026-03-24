@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { StartRunInput } from '../validation';
+import type { StartRunInput } from '../run.validation';
 import { buildRunInput } from './build-run-input';
 
 const validInput: StartRunInput = {

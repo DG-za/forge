@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useActionState, useState } from 'react';
-import type { ActionResult } from '../runs.types';
+import type { ActionResult } from '../run.types';
 import {
   DEFAULT_BUDGET_USD,
   DEFAULT_GATE_COMMANDS,

@@ -1,7 +1,7 @@
-import type { RunSummary } from '@/app/runs/runs.types';
 import { Card, CardContent } from '@/components/ui/card';
+import type { RunSummary } from '@/features/runs/run.types';
 import Link from 'next/link';
-import { formatCost, formatRelativeTime } from './format.utils';
+import { formatCost, formatRelativeTime } from '../format.utils';
 import { StatusBadge } from './status-badge.component';
 
 export function RunCard({ run }: { run: RunSummary }) {

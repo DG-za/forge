@@ -66,7 +66,12 @@ describe('cleanupWorktree', () => {
   it('should remove worktree and delete branch', async () => {
     const { exec, calls } = createMockExec();
 
-    await cleanupWorktree('/repos/owner/repo', '/repos/owner/repo/.worktrees/feature/42-add-auth', 'feature/42-add-auth', exec);
+    await cleanupWorktree(
+      '/repos/owner/repo',
+      '/repos/owner/repo/.worktrees/feature/42-add-auth',
+      'feature/42-add-auth',
+      exec,
+    );
 
     const removeCall = calls.find((c) => c.command.includes('git worktree remove'));
     expect(removeCall).toBeDefined();

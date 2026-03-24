@@ -1,6 +1,6 @@
 import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
 import { prisma } from '@/shared/db';
-import type { RunDetail, RunSummary } from './runs.types';
+import type { RunDetail, RunSummary } from './run.types';
 
 export async function getRuns(): Promise<RunSummary[]> {
   return prisma.run.findMany({

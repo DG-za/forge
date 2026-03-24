@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
+import type { RunSummary } from '../run.types';
+import { useRunEvents } from '../use-run-events.hook';
 import { RunCard } from './run-card.component';
 import { RunListEmpty } from './run-list-empty.component';
-import type { RunSummary } from './runs/runs.types';
-import { useRunEvents } from './use-run-events.hook';
 
 export function Dashboard({ runs: initialRuns }: { runs: RunSummary[] }) {
   const statusMap = useRunEvents();

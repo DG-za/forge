@@ -4,7 +4,7 @@ import { GET } from './route';
 
 const listeners = new Set<StateChangeListener>();
 
-vi.mock('@/app/runs/pipeline.singleton', () => ({
+vi.mock('@/lib/pipeline.singleton', () => ({
   getStateEmitter: () => ({
     on: (fn: StateChangeListener) => listeners.add(fn),
     off: (fn: StateChangeListener) => listeners.delete(fn),

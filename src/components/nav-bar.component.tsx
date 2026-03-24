@@ -1,5 +1,5 @@
-import { FlameIcon } from '@/app/flame-icon.component';
-import { NavLinks } from '@/app/nav-links.component';
+import { FlameIcon } from '@/components/flame-icon.component';
+import { NavLinks } from '@/components/nav-links.component';
 
 export function NavBar() {
   return (

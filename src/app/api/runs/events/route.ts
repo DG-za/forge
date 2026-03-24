@@ -1,5 +1,5 @@
-import { getStateEmitter } from '@/app/runs/pipeline.singleton';
 import type { StateChangeEvent } from '@/dispatcher/state-machine.types';
+import { getStateEmitter } from '@/lib/pipeline.singleton';
 
 // TODO (#44): IssueTransition has no runId — issue events are dropped by the runId filter.
 // Add runId to IssueTransition or look up the run from issueId when the detail page needs them.

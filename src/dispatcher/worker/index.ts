@@ -1,2 +1,2 @@
 export { runWorker } from './run-worker';
-export type { WorkerOptions, WorkerResult, RepoConfig, AgentCompleteEvent } from './worker.types';
+export type { AgentCompleteEvent, RepoConfig, WorkerOptions, WorkerResult } from './worker.types';

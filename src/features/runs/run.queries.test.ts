@@ -10,7 +10,7 @@ vi.mock('@/shared/db', () => ({
   prisma: { run: { findMany: mockFindMany, findUnique: mockFindUnique } },
 }));
 
-import { getRun, getRuns, getRunStatus } from './queries';
+import { getRun, getRuns, getRunStatus } from './run.queries';
 
 function buildMockApi(status: RunStatus | null = null): PipelineApi {
   return {

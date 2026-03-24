@@ -1,7 +1,7 @@
-import { formatRelativeTime } from '@/app/format.utils';
-import { getRun } from '@/app/runs/queries';
+import { RunDetailView } from '@/features/runs/components/run-detail.component';
+import { formatRelativeTime } from '@/features/runs/format.utils';
+import { getRun } from '@/features/runs/run.queries';
 import { notFound } from 'next/navigation';
-import { RunDetailView } from './run-detail.component';
 
 export default async function RunDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

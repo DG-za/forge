@@ -2,15 +2,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/app/runs/queries', () => ({
+vi.mock('@/features/runs/run.queries', () => ({
   getRuns: vi.fn(),
 }));
 
-vi.mock('@/app/use-run-events.hook', () => ({
+vi.mock('@/features/runs/use-run-events.hook', () => ({
   useRunEvents: () => new Map(),
 }));
 
-import { getRuns } from '@/app/runs/queries';
+import { getRuns } from '@/features/runs/run.queries';
 import DashboardPage from './page';
 
 const mockGetRuns = vi.mocked(getRuns);

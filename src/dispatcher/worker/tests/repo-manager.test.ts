@@ -65,7 +65,7 @@ describe('ensureRepo', () => {
   it('should create parent directory before cloning', async () => {
     const { exec, calls } = createMockExec({
       'test -d': { exitCode: 1, output: '' },
-      'mkdir': { exitCode: 0, output: '' },
+      mkdir: { exitCode: 0, output: '' },
       'git clone': { exitCode: 0, output: 'Cloning...' },
     });
 

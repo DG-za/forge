@@ -1,7 +1,7 @@
 import type { Cost } from '../agent-runner.types';
-import type { CommandExecutor, CoderTask, QualityGateConfig } from '../coder/coder.types';
-import type { AgentCompleteEvent } from '../pipeline/process-issue';
+import type { CoderTask, CommandExecutor, QualityGateConfig } from '../coder/coder.types';
 import type { RoleConfig } from '../pipeline/pipeline.types';
+import type { AgentCompleteEvent } from '../pipeline/process-issue';
 
 export type { AgentCompleteEvent };
 

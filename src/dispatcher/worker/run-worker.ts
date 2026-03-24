@@ -15,7 +15,11 @@ export async function runWorker(options: WorkerOptions): Promise<WorkerResult> {
   const issueNumber = task.issueNumber ?? 0;
   const branch = buildBranchName(issueNumber, task.title);
   const failed = (cost: Cost = ZERO_COST): WorkerResult => ({
-    issueNumber, status: 'failed', cost, prUrl: null, branch,
+    issueNumber,
+    status: 'failed',
+    cost,
+    prUrl: null,
+    branch,
   });
 
   const auth = await verifyGitAccess(repoConfig.repo, exec);
@@ -43,9 +47,7 @@ export async function runWorker(options: WorkerOptions): Promise<WorkerResult> {
       onAgentComplete: options.onAgentComplete,
     });
 
-    const prUrl = outcome.status === 'done'
-      ? await createPullRequest(worktree.worktreePath, branch, task, exec)
-      : null;
+    const prUrl = outcome.status === 'done' ? await createPullRequest(worktree.worktreePath, branch, task, exec) : null;
 
     return { issueNumber, status: outcome.status, cost: outcome.cost, prUrl, branch };
   } catch {

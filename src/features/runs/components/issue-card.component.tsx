@@ -1,8 +1,8 @@
-import { formatCost } from '@/app/format.utils';
-import { StatusBadge } from '@/app/status-badge.component';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { StatusBadge } from '@/features/runs/components/status-badge.component';
+import { formatCost } from '@/features/runs/format.utils';
 import { ChevronRight } from 'lucide-react';
-import type { RunDetail } from '../runs.types';
+import type { RunDetail } from '../run.types';
 
 type Issue = RunDetail['issues'][number];
 

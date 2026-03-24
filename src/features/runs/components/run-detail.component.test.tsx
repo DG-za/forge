@@ -2,14 +2,14 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { RunDetail } from '../runs.types';
+import type { RunDetail } from '../run.types';
 import { RunDetailView } from './run-detail.component';
 
-vi.mock('@/app/use-run-events.hook', () => ({
+vi.mock('@/features/runs/use-run-events.hook', () => ({
   useRunEvents: vi.fn().mockReturnValue(new Map()),
 }));
 
-vi.mock('./cancel-run.action', () => ({
+vi.mock('../cancel-run.action', () => ({
   cancelRunAction: vi.fn().mockResolvedValue({ success: true }),
 }));
 
@@ -103,7 +103,7 @@ describe('RunDetailView', () => {
   });
 
   it('should update status from SSE events', async () => {
-    const { useRunEvents } = await import('@/app/use-run-events.hook');
+    const { useRunEvents } = await import('@/features/runs/use-run-events.hook');
     vi.mocked(useRunEvents).mockReturnValue(new Map([['run-1', 'completed']]));
 
     render(<RunDetailView run={buildRun({ status: 'in_progress' })} {...defaultTimestamps} />);
@@ -113,10 +113,10 @@ describe('RunDetailView', () => {
   });
 
   it('should call cancelRunAction when cancel is clicked', async () => {
-    const { useRunEvents } = await import('@/app/use-run-events.hook');
+    const { useRunEvents } = await import('@/features/runs/use-run-events.hook');
     vi.mocked(useRunEvents).mockReturnValue(new Map());
 
-    const { cancelRunAction } = await import('./cancel-run.action');
+    const { cancelRunAction } = await import('../cancel-run.action');
 
     render(<RunDetailView run={buildRun({ status: 'in_progress' })} {...defaultTimestamps} />);
 
@@ -126,10 +126,10 @@ describe('RunDetailView', () => {
   });
 
   it('should show error when cancel fails', async () => {
-    const { useRunEvents } = await import('@/app/use-run-events.hook');
+    const { useRunEvents } = await import('@/features/runs/use-run-events.hook');
     vi.mocked(useRunEvents).mockReturnValue(new Map());
 
-    const { cancelRunAction } = await import('./cancel-run.action');
+    const { cancelRunAction } = await import('../cancel-run.action');
     vi.mocked(cancelRunAction).mockResolvedValue({ error: 'Run not found or not running' });
 
     render(<RunDetailView run={buildRun({ status: 'in_progress' })} {...defaultTimestamps} />);

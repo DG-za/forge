@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { RunSummary } from '@/app/runs/runs.types';
+import type { RunSummary } from '@/features/runs/run.types';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { RunCard } from './run-card.component';

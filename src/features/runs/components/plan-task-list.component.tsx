@@ -1,8 +1,8 @@
-import { StatusBadge } from '@/app/status-badge.component';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { StatusBadge } from '@/features/runs/components/status-badge.component';
 import { ChevronRight } from 'lucide-react';
-import type { RunDetail } from '../runs.types';
+import type { RunDetail } from '../run.types';
 
 type PlanTask = RunDetail['planTasks'][number];
 type Issue = RunDetail['issues'][number];

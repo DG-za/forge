@@ -1,7 +1,7 @@
 import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/app/runs/pipeline.singleton', () => ({
+vi.mock('@/lib/pipeline.singleton', () => ({
   getPipelineApi: (): PipelineApi => mockApi,
 }));
 

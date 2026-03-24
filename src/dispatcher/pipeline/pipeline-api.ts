@@ -1,4 +1,4 @@
-import { TERMINAL_RUN_STATUSES } from '@/app/runs/runs.types';
+import { TERMINAL_RUN_STATUSES } from '@/features/runs/run.types';
 import type { PrismaClient } from '../../../generated/prisma/client';
 import type { IssueFetcher } from '../planner/planner.types';
 import type { StateChangeListener } from '../state-machine.types';

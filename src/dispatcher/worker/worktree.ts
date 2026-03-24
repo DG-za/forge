@@ -2,11 +2,7 @@ import type { CommandExecutor } from '../coder/coder.types';
 
 type WorktreeResult = { ok: true; worktreePath: string } | { ok: false; error: string };
 
-export async function createWorktree(
-  repoDir: string,
-  branch: string,
-  exec: CommandExecutor,
-): Promise<WorktreeResult> {
+export async function createWorktree(repoDir: string, branch: string, exec: CommandExecutor): Promise<WorktreeResult> {
   const worktreePath = `${repoDir}/.worktrees/${branch}`;
 
   const branchResult = await exec(`git branch ${branch}`, repoDir);

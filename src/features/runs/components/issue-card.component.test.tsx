@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { RunDetail } from '../runs.types';
+import type { RunDetail } from '../run.types';
 import { IssueCard } from './issue-card.component';
 
 afterEach(cleanup);

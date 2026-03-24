@@ -1,7 +1,7 @@
 import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
-import type { ActionResult } from './runs.types';
-import type { StartRunInput } from './validation';
-import { startRunSchema } from './validation';
+import type { ActionResult } from './run.types';
+import type { StartRunInput } from './run.validation';
+import { startRunSchema } from './run.validation';
 
 export type RunInputBuilder = (input: StartRunInput) => Parameters<PipelineApi['startRun']>[0];
 
