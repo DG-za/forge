@@ -1,0 +1,32 @@
+IMPORTANT: Do NOT start implementing immediately. First:
+1. Summarise what you understand about this issue in 2-3 sentences.
+2. Ask the open questions listed below — Stefan wants to answer these before you start.
+3. If you have additional questions or suggestions, include those too.
+4. Wait for Stefan's answers before writing any code or making any changes.
+
+Work on issue DG-za/forge#40: Tailwind CSS + layout shell 🎨
+
+## Summary
+
+Install Tailwind CSS, set up dark theme tokens, and build the mobile-first layout shell that all pages will use.
+
+## Acceptance Criteria
+
+- [ ] Tailwind CSS installed and configured (`tailwind.config.ts`, `globals.css` with base/components/utilities)
+- [ ] Dark theme by default using CSS custom properties and Tailwind's `darkMode: 'class'` or media strategy
+- [ ] Root layout with mobile-first responsive shell: top nav bar with "Forge" branding, main content area
+- [ ] Nav links to Dashboard (`/`) and New Run (`/runs/new`)
+- [ ] `loading.tsx` at app level for route-level loading states
+- [ ] `error.tsx` at app level for error boundaries
+- [ ] Placeholder pages at `/` (dashboard) and `/runs/new` (trigger form)
+- [ ] Mobile viewport meta tag and responsive breakpoints
+- [ ] Looks good on a phone screen (375px width)
+
+## Notes
+
+- Keep styling minimal — this is a control panel, not a marketing site
+- Use Tailwind utility classes, no component library yet
+- Refer to AGENTS.md for Tailwind and Next.js conventions
+
+## Parent epic
+- #16 Phase 3: Web UI 📲

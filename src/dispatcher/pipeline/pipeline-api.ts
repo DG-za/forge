@@ -1,3 +1,4 @@
+import { TERMINAL_RUN_STATUSES } from '@/app/runs/runs.types';
 import type { PrismaClient } from '../../../generated/prisma/client';
 import type { IssueFetcher } from '../planner/planner.types';
 import type { StateChangeListener } from '../state-machine.types';
@@ -46,7 +47,7 @@ export function createPipelineApi(prisma: PrismaClient, onStateChange?: StateCha
     const run = await prisma.run.findUnique({ where: { id: runId } });
     if (!run) return null;
 
-    const isTerminal = run.status === 'completed' || run.status === 'failed';
+    const isTerminal = TERMINAL_RUN_STATUSES.has(run.status);
     if (controllers.has(runId) && !isTerminal) return { state: 'in_progress' };
     return { state: run.status as RunStatus['state'] };
   }

@@ -1,6 +1,10 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-@theme {
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
   /* Background layers */
   --color-bg: #09090b;
   --color-surface: #18181b;
@@ -21,9 +25,43 @@
 
   /* Font */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  /* shadcn tokens mapped to our dark theme */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-surface-alt);
+  --color-secondary-foreground: var(--color-text);
+  --color-muted: var(--color-surface-alt);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-accent-foreground: #ffffff;
+  --color-destructive: oklch(0.704 0.191 22.216);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-accent);
+}
+
+:root {
+  --radius: 0.625rem;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
 }
