@@ -26,11 +26,26 @@ export function useRunEvents(runId?: string): StateChangeEvent[] {
       };
     }
 
-    connect();
-
-    return () => {
+    function disconnect() {
       clearTimeout(reconnectTimer);
       sourceRef.current?.close();
+      sourceRef.current = null;
+    }
+
+    function handleVisibility() {
+      if (document.hidden) {
+        disconnect();
+      } else if (!sourceRef.current) {
+        connect();
+      }
+    }
+
+    connect();
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      disconnect();
     };
   }, [runId]);
 

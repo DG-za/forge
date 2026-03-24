@@ -86,6 +86,23 @@ describe('useRunEvents', () => {
     expect(source.closed).toBe(true);
   });
 
+  it('should disconnect when tab is hidden and reconnect when visible', () => {
+    renderHook(() => useRunEvents());
+    const initialSource = MockEventSource.instances[0];
+    expect(initialSource.closed).toBe(false);
+
+    // Simulate tab hidden
+    Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    expect(initialSource.closed).toBe(true);
+
+    // Simulate tab visible
+    Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    expect(MockEventSource.instances).toHaveLength(2);
+    expect(MockEventSource.instances[1].closed).toBe(false);
+  });
+
   it('should reconnect on error', async () => {
     renderHook(() => useRunEvents());
     const source = MockEventSource.instances[0];
