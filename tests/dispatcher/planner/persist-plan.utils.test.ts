@@ -3,7 +3,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import { execSync } from 'child_process';
 import pg from 'pg';
 import { describe, expect, it } from 'vitest';
-import { PrismaClient } from '@/dispatcher/../../generated/prisma/client';
+import { PrismaClient } from '../../../generated/prisma/client';
 import { createRun } from '../factories.utils';
 import { persistPlan } from '@/dispatcher/planner/persist-plan.utils';
 import type { Plan } from '@/dispatcher/planner/planner.types';

@@ -2,7 +2,7 @@
 import type { RunState } from '@/dispatcher/state-machine.types';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RunSummary } from '../run.types';
+import type { RunSummary } from '@/features/runs/run.types';
 
 let mockStatusMap = new Map<string, RunState>();
 vi.mock('@/features/runs/use-run-events.hook', () => ({

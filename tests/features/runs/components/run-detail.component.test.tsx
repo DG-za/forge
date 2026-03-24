@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { RunDetail } from '../run.types';
+import type { RunDetail } from '@/features/runs/run.types';
 import { RunDetailView } from '@/features/runs/components/run-detail.component';
 
 vi.mock('@/features/runs/use-run-events.hook', () => ({
