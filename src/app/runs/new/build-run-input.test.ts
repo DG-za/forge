@@ -12,6 +12,10 @@ const validInput: StartRunInput = {
   coderModel: 'gpt-4.1',
   reviewerPlatform: 'claude',
   reviewerModel: 'claude-sonnet-4-6',
+  lintCommand: 'npm run lint',
+  typecheckCommand: 'npm run typecheck',
+  testCommand: 'npm test',
+  repoBasePath: '/repos',
 };
 
 describe('buildRunInput', () => {

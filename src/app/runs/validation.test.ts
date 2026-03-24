@@ -10,7 +10,14 @@ const validRoles = {
   reviewerModel: 'claude-sonnet-4-6',
 };
 
-const validInput = { repo: 'owner/repo', epicNumber: 42, budgetUsd: 25, ...validRoles };
+const validGates = {
+  lintCommand: 'npm run lint',
+  typecheckCommand: 'npm run typecheck',
+  testCommand: 'npm test',
+  repoBasePath: '/repos',
+};
+
+const validInput = { repo: 'owner/repo', epicNumber: 42, budgetUsd: 25, ...validRoles, ...validGates };
 
 describe('startRunSchema', () => {
   it('should accept valid input with role configs', () => {
@@ -31,7 +38,7 @@ describe('startRunSchema', () => {
   });
 
   it('should coerce string numbers', () => {
-    const result = startRunSchema.safeParse({ ...validRoles, repo: 'owner/repo', epicNumber: '10', budgetUsd: '5.50' });
+    const result = startRunSchema.safeParse({ ...validRoles, ...validGates, repo: 'owner/repo', epicNumber: '10', budgetUsd: '5.50' });
 
     expect(result.success).toBe(true);
     expect(result.data).toMatchObject({ repo: 'owner/repo', epicNumber: 10, budgetUsd: 5.5 });

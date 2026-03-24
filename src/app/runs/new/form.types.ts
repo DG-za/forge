@@ -38,3 +38,11 @@ export const DEFAULT_ROLES: Record<'planner' | 'coder' | 'reviewer', RoleFormVal
 };
 
 export const DEFAULT_BUDGET_USD = 10;
+
+export const DEFAULT_GATE_COMMANDS = {
+  lintCommand: 'npm run lint',
+  typecheckCommand: 'npm run typecheck',
+  testCommand: 'npm test',
+};
+
+export const DEFAULT_REPO_BASE_PATH = '/repos';

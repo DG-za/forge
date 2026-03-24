@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { CommandExecutor } from '../../coder/coder.types';
 import type { IssueOutcome } from '../../pipeline/pipeline.types';
 import { runWorker } from '../run-worker';
 import type { WorkerOptions } from '../worker.types';
