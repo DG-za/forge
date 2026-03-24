@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StartRunInput } from '../run.validation';
-import { buildRunInput } from './build-run-input';
+import { buildRunInput } from './build-run-input.utils';
 
 const validInput: StartRunInput = {
   repo: 'owner/repo',

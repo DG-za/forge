@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button.component';
 import { Dashboard } from '@/features/runs/components/dashboard.component';
 import { getRuns } from '@/features/runs/run.queries';
 import Link from 'next/link';

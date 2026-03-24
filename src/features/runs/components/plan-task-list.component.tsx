@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge.component';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.component';
 import { StatusBadge } from '@/features/runs/components/status-badge.component';
 import { ChevronRight } from 'lucide-react';
 import type { RunDetail } from '../run.types';

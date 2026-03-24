@@ -5,7 +5,7 @@ import type { RunInput } from '@/dispatcher/pipeline/pipeline-api';
 import type { RoleConfig } from '@/dispatcher/pipeline/pipeline.types';
 import type { RunInputBuilder } from '../run.actions';
 import { GithubIssueFetcher } from './github-issue-fetcher';
-import { shellExec } from './shell-exec';
+import { shellExec } from './shell-exec.utils';
 
 function createRunner(platform: Platform) {
   return platform === 'claude' ? new ClaudeRunner() : new OpenAIRunner();

@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card.component';
 import type { RunSummary } from '@/features/runs/run.types';
 import Link from 'next/link';
 import { formatCost, formatRelativeTime } from '../format.utils';

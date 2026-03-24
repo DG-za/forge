@@ -1,4 +1,4 @@
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.component';
 import { StatusBadge } from '@/features/runs/components/status-badge.component';
 import { formatCost } from '@/features/runs/format.utils';
 import { ChevronRight } from 'lucide-react';

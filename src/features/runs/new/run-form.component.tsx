@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button.component';
+import { Input } from '@/components/ui/input.component';
+import { Label } from '@/components/ui/label.component';
 import { useActionState, useState } from 'react';
 import type { ActionResult } from '../run.types';
 import {

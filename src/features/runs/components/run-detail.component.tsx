@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button.component';
+import { Progress } from '@/components/ui/progress.component';
 import { StatusBadge } from '@/features/runs/components/status-badge.component';
 import { formatCost } from '@/features/runs/format.utils';
 import { useRunEvents } from '@/features/runs/use-run-events.hook';

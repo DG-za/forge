@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge.component';
 import { getStatusConfig } from '../status-badge.utils';
 
 export function StatusBadge({ status }: { status: string }) {
