@@ -1,24 +1,8 @@
 # Roadmap 🗺️
 
-**Last updated:** 2026-03-22
+**Last updated:** 2026-03-24
 
-## Current Phase
-
-### Phase 3: Web UI 📲
-
-**Epic:** #16
-**Status:** in progress — 0/6 issues done
-
-Mobile-first web dashboard for triggering runs, monitoring progress, and reviewing results. Issues in dependency order:
-
-1. #40 — Tailwind CSS + layout shell
-2. #41 — Server actions for pipeline data
-3. #42 — Dashboard — run list page
-4. #43 — Start run form
-5. #44 — Run detail page
-6. #45 — Live status polling
-
-## Upcoming Phases
+## Next Phase
 
 ### Phase 4: AI Chat + MCPs 💬
 
@@ -26,6 +10,8 @@ Mobile-first web dashboard for triggering runs, monitoring progress, and reviewi
 **Status:** not started — sub-issues will be created when this phase begins
 
 Interactive AI chat interface in the web UI with MCP integrations. Gives mobile access to a Claude/OpenAI assistant with tools like GitHub, TickTick, Gmail — a phone-accessible version of the second-brain Claude bot. Includes MCP management UI, skills system, and session history.
+
+## Upcoming Phases
 
 ### Phase 5: Human-in-the-Loop ❓
 
@@ -48,14 +34,27 @@ Dockerize the full stack, deploy to the home server, and run a live smoke test a
 
 When workers create PRs on target repos, automatically deploy a preview so you can see the running app before merging. Convention-based (Dockerfile or framework auto-detection). Accessible at `forge.dgza.co.za/preview/{run_id}`, torn down on merge/close.
 
+## Backlog
+
+Non-blocking polish issues from Phase 2:
+
+- #31 — Move model pricing to database 💰
+- #33 — Add state transition history table for audit logging 📋
+- #34 — Add optimistic concurrency locking to state transitions 🔒
+
 ## Completed Phases
+
+### Phase 3: Web UI 📲
+
+**Epic:** #16 (closed)
+
+Mobile-first web dashboard for triggering runs, monitoring progress, and reviewing results. 10 sub-issues completed: layout shell (#40), server actions (#41), dashboard (#42), start run form (#43), run detail page (#44), live polling (#45), form builder (#48), env validation (#52), shadcn/ui migration (#54), feature module refactor (#59).
 
 ### Phase 2: Core Engine ⚙️
 
-**Epic:** #15
-**Status:** core complete — 8/8 pipeline issues closed
+**Epic:** #15 (closed)
 
-Built the full autonomous pipeline: AgentRunner abstraction, state machine, Planner → Coder → Reviewer flow, cost tracking with budget enforcement, and pipeline orchestrator with resume support. Three non-blocking polish issues remain open (#31 model pricing to DB, #33 audit logging, #34 optimistic concurrency).
+Built the full autonomous pipeline: AgentRunner abstraction, state machine, Planner → Coder → Reviewer flow, cost tracking with budget enforcement, pipeline orchestrator with resume support, and worker agent with git worktree isolation.
 
 ### Phase 1: Foundation 🧱
 
