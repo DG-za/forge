@@ -44,6 +44,10 @@
 - Cost tracking: `AgentLog` records persisted per agent invocation (role, platform, model, tokens, cost, duration). `processIssue` uses `onAgentComplete` callback to report coder/reviewer completions. Planner log attached to first issue. `BudgetWarning` event emitted via `StateChangeListener` at 80% budget (once per run).
 - State machine: pure function transition validation (`transitionRun`, `transitionIssue`) + persistence layer. `StateChangeEvent` supports `run`, `issue`, and `budget_warning` kinds.
 - Prisma v7 requires a driver adapter — use `@prisma/adapter-pg` with `pg.Pool`. Import PrismaClient from `generated/prisma/client` (custom output path, no `.js` extension — Prisma v7 generates `.ts`), not from `@prisma/client`.
+- Worker agent (`src/dispatcher/worker/`) handles single-issue execution on target repos: `verifyGitAccess` → `ensureRepo` (clone/pull) → `createWorktree` (isolated branch) → `buildWorkerContext` (read target repo's CLAUDE.md/AGENTS.md/PROJECT.md) → `processIssue` → `createPullRequest` → `cleanupWorktree`. Configurable `repoBasePath` determines where repos are cloned (`{basePath}/{owner}/{repo}`).
+- Worker uses git worktrees for isolation — each issue gets its own worktree, sharing the git object store. Faster than separate clones.
+- Quality gate commands (lint, typecheck, test) are configurable per run via the start form, not hardcoded. Defaults: `npm run lint`, `npm run typecheck`, `npm test`.
+- Pipeline uses `runWorker` when `repoBasePath` is set in config, falls back to direct `processIssue` otherwise (backward compatible).
 
 ## References
 

@@ -24,6 +24,10 @@ export async function startRun(
     coderModel: formData.get('coderModel'),
     reviewerPlatform: formData.get('reviewerPlatform'),
     reviewerModel: formData.get('reviewerModel'),
+    lintCommand: formData.get('lintCommand'),
+    typecheckCommand: formData.get('typecheckCommand'),
+    testCommand: formData.get('testCommand'),
+    repoBasePath: formData.get('repoBasePath') || undefined,
   });
 
   if (!parsed.success) {

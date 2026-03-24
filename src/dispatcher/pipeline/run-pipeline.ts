@@ -4,7 +4,9 @@ import { addCost } from '../cost.utils';
 import type { IssueFetcher, Plan, PlannedTask } from '../planner/planner.types';
 import { runPlanner } from '../planner/run-planner';
 import type { RunState, StateChangeEvent, StateChangeListener } from '../state-machine.types';
+import type { AgentCompleteEvent } from './process-issue';
 import { createPipelinePersistence, type PipelinePersistence } from './pipeline-persistence';
+import { runWorker } from '../worker/run-worker';
 import type { IssueOutcome, PipelineConfig, PipelineResult } from './pipeline.types';
 import { processIssue } from './process-issue';
 import type { ResumeState } from './resume-run';
@@ -89,26 +91,40 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     }
 
     try {
-      const outcome = await processIssue({
-        task: {
-          issueNumber: task.issueNumber,
-          title: task.title,
-          body: '',
-          acceptanceCriteria: task.acceptanceCriteria,
-        },
-        coder: config.coder,
-        reviewer: config.reviewer,
-        gateConfig: config.gateConfig,
-        cwd: config.cwd,
-        maxBudgetUsd: remainingBudget,
-        exec: config.exec,
-        getDiff: options.getDiff,
-        onAgentComplete: issueId
-          ? async (event) => {
-              await db?.createAgentLog({ issueId, ...event });
-            }
-          : undefined,
-      });
+      const coderTask = {
+        issueNumber: task.issueNumber,
+        title: task.title,
+        body: '',
+        acceptanceCriteria: task.acceptanceCriteria,
+      };
+      const onAgentComplete = issueId
+        ? async (event: AgentCompleteEvent) => {
+            await db?.createAgentLog({ issueId, ...event });
+          }
+        : undefined;
+
+      const outcome = config.repoBasePath
+        ? await runWorker({
+            task: coderTask,
+            repoConfig: { repo: config.repo, basePath: config.repoBasePath },
+            coder: config.coder,
+            reviewer: config.reviewer,
+            gateConfig: config.gateConfig,
+            maxBudgetUsd: remainingBudget,
+            exec: config.exec,
+            onAgentComplete,
+          })
+        : await processIssue({
+            task: coderTask,
+            coder: config.coder,
+            reviewer: config.reviewer,
+            gateConfig: config.gateConfig,
+            cwd: config.cwd,
+            maxBudgetUsd: remainingBudget,
+            exec: config.exec,
+            getDiff: options.getDiff,
+            onAgentComplete,
+          });
 
       totalCost = addCost(totalCost, outcome.cost);
       outcomes.push(outcome);

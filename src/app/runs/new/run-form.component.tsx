@@ -5,7 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useActionState, useState } from 'react';
 import type { ActionResult } from '../runs.types';
-import { DEFAULT_BUDGET_USD, DEFAULT_ROLES, MODEL_OPTIONS, PLATFORM_OPTIONS, type Platform } from './form.types';
+import {
+  DEFAULT_BUDGET_USD,
+  DEFAULT_GATE_COMMANDS,
+  DEFAULT_REPO_BASE_PATH,
+  DEFAULT_ROLES,
+  MODEL_OPTIONS,
+  PLATFORM_OPTIONS,
+  type Platform,
+} from './form.types';
 import { RoleFields } from './role-fields.component';
 
 type Props = {
@@ -62,6 +70,62 @@ export function RunForm({ action }: Props) {
             max={500}
             step={0.01}
             defaultValue={DEFAULT_BUDGET_USD}
+          />
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-4">
+        <div>
+          <Label htmlFor="repoBasePath" className="mb-1">
+            Repo base path
+          </Label>
+          <Input
+            id="repoBasePath"
+            name="repoBasePath"
+            type="text"
+            defaultValue={DEFAULT_REPO_BASE_PATH}
+            placeholder="/repos (leave empty to skip worker mode)"
+          />
+          <p className="text-muted-foreground mt-1 text-xs">Local directory where repos are cloned</p>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-4">
+        <legend className="text-sm font-medium">Quality gates</legend>
+        <div>
+          <Label htmlFor="lintCommand" className="mb-1">
+            Lint command
+          </Label>
+          <Input
+            id="lintCommand"
+            name="lintCommand"
+            type="text"
+            required
+            defaultValue={DEFAULT_GATE_COMMANDS.lintCommand}
+          />
+        </div>
+        <div>
+          <Label htmlFor="typecheckCommand" className="mb-1">
+            Typecheck command
+          </Label>
+          <Input
+            id="typecheckCommand"
+            name="typecheckCommand"
+            type="text"
+            required
+            defaultValue={DEFAULT_GATE_COMMANDS.typecheckCommand}
+          />
+        </div>
+        <div>
+          <Label htmlFor="testCommand" className="mb-1">
+            Test command
+          </Label>
+          <Input
+            id="testCommand"
+            name="testCommand"
+            type="text"
+            required
+            defaultValue={DEFAULT_GATE_COMMANDS.testCommand}
           />
         </div>
       </fieldset>
