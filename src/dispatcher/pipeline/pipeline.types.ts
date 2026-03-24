@@ -17,6 +17,7 @@ export type PipelineConfig = {
   cwd: string;
   maxBudgetUsd: number;
   exec: CommandExecutor;
+  repoBasePath?: string;
   onStateChange?: StateChangeListener;
 };
 
