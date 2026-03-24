@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateEnv } from './validate-env';
+import { validateEnv } from './env.utils';
 
 const validEnv = {
   DATABASE_URL: 'postgresql://forge:forge@localhost:5432/forge',
