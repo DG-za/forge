@@ -7,22 +7,16 @@ import type { RunSummary } from './runs/runs.types';
 import { useRunEvents } from './use-run-events.hook';
 
 export function Dashboard({ runs: initialRuns }: { runs: RunSummary[] }) {
-  const events = useRunEvents();
+  const statusMap = useRunEvents();
 
   const runs = useMemo(() => {
-    const statusOverrides = new Map<string, string>();
-    for (const event of events) {
-      if (event.kind === 'run') {
-        statusOverrides.set(event.transition.runId, event.transition.to);
-      }
-    }
-    if (statusOverrides.size === 0) return initialRuns;
+    if (statusMap.size === 0) return initialRuns;
 
     return initialRuns.map((run) => {
-      const newStatus = statusOverrides.get(run.id);
+      const newStatus = statusMap.get(run.id);
       return newStatus ? { ...run, status: newStatus } : run;
     });
-  }, [initialRuns, events]);
+  }, [initialRuns, statusMap]);
 
   if (runs.length === 0) return <RunListEmpty />;
 

@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import type { StateChangeEvent } from '@/dispatcher/state-machine.types';
+import type { RunState } from '@/dispatcher/state-machine.types';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RunSummary } from './runs/runs.types';
 
-let mockEvents: StateChangeEvent[] = [];
+let mockStatusMap = new Map<string, RunState>();
 vi.mock('@/app/use-run-events.hook', () => ({
-  useRunEvents: () => mockEvents,
+  useRunEvents: () => mockStatusMap,
 }));
 
 vi.mock('next/link', () => ({
@@ -33,7 +33,7 @@ function buildRun(overrides: Partial<RunSummary> = {}): RunSummary {
 
 describe('Dashboard', () => {
   beforeEach(() => {
-    mockEvents = [];
+    mockStatusMap = new Map();
   });
 
   it('should render initial runs', () => {
@@ -43,20 +43,18 @@ describe('Dashboard', () => {
     expect(screen.getByText('acme/web')).toBeDefined();
   });
 
-  it('should update run status when SSE event arrives', () => {
+  it('should update run status from SSE status map', () => {
     const runs = [buildRun({ id: 'run-1', status: 'pending' })];
-
-    mockEvents = [{ kind: 'run', transition: { runId: 'run-1', from: 'pending', to: 'planning' } }];
+    mockStatusMap = new Map([['run-1', 'planning']]);
 
     render(<Dashboard runs={runs} />);
 
     expect(screen.getByText('Planning')).toBeDefined();
   });
 
-  it('should not update runs that do not match the event runId', () => {
+  it('should not update runs that are not in the status map', () => {
     const runs = [buildRun({ id: 'run-1', status: 'pending' }), buildRun({ id: 'run-2', status: 'completed' })];
-
-    mockEvents = [{ kind: 'run', transition: { runId: 'run-1', from: 'pending', to: 'in_progress' } }];
+    mockStatusMap = new Map([['run-1', 'in_progress']]);
 
     render(<Dashboard runs={runs} />);
 
@@ -64,29 +62,17 @@ describe('Dashboard', () => {
     expect(screen.getByText('Completed')).toBeDefined();
   });
 
-  it('should handle multiple sequential status updates', () => {
+  it('should reflect the latest status when map has been updated multiple times', () => {
     const runs = [buildRun({ id: 'run-1', status: 'pending' })];
-
-    mockEvents = [
-      { kind: 'run', transition: { runId: 'run-1', from: 'pending', to: 'planning' } },
-      { kind: 'run', transition: { runId: 'run-1', from: 'planning', to: 'in_progress' } },
-    ];
+    mockStatusMap = new Map([['run-1', 'in_progress']]);
 
     render(<Dashboard runs={runs} />);
 
-    // Last event wins
     expect(screen.getByText('Running')).toBeDefined();
   });
 
-  it('should ignore non-run events', () => {
+  it('should render initial status when no SSE updates exist', () => {
     const runs = [buildRun({ id: 'run-1', status: 'pending' })];
-
-    mockEvents = [
-      {
-        kind: 'budget_warning',
-        warning: { runId: 'run-1', currentCostUsd: 8, budgetUsd: 10, percentUsed: 0.8 },
-      },
-    ];
 
     render(<Dashboard runs={runs} />);
 

@@ -1,6 +1,8 @@
 import { getStateEmitter } from '@/app/runs/pipeline.singleton';
 import type { StateChangeEvent } from '@/dispatcher/state-machine.types';
 
+// TODO (#44): IssueTransition has no runId — issue events are dropped by the runId filter.
+// Add runId to IssueTransition or look up the run from issueId when the detail page needs them.
 function getRunId(event: StateChangeEvent): string | null {
   if (event.kind === 'run') return event.transition.runId;
   if (event.kind === 'budget_warning') return event.warning.runId;

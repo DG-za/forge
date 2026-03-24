@@ -50,22 +50,18 @@ describe('useRunEvents', () => {
     expect(MockEventSource.instances[0].url).toBe('/api/runs/events?runId=run-123');
   });
 
-  it('should return events as they arrive', () => {
+  it('should return latest status per run', () => {
     const { result } = renderHook(() => useRunEvents());
     const source = MockEventSource.instances[0];
 
-    const event: StateChangeEvent = {
-      kind: 'run',
-      transition: { runId: 'run-1', from: 'pending', to: 'planning' },
-    };
+    act(() => {
+      source.simulateMessage({ kind: 'run', transition: { runId: 'run-1', from: 'pending', to: 'planning' } });
+    });
 
-    act(() => source.simulateMessage(event));
-
-    expect(result.current).toHaveLength(1);
-    expect(result.current[0]).toEqual(event);
+    expect(result.current.get('run-1')).toBe('planning');
   });
 
-  it('should accumulate multiple events', () => {
+  it('should keep only latest status when multiple events arrive for same run', () => {
     const { result } = renderHook(() => useRunEvents());
     const source = MockEventSource.instances[0];
 
@@ -74,7 +70,36 @@ describe('useRunEvents', () => {
       source.simulateMessage({ kind: 'run', transition: { runId: 'r1', from: 'planning', to: 'in_progress' } });
     });
 
-    expect(result.current).toHaveLength(2);
+    expect(result.current.get('r1')).toBe('in_progress');
+    expect(result.current.size).toBe(1);
+  });
+
+  it('should track multiple runs independently', () => {
+    const { result } = renderHook(() => useRunEvents());
+    const source = MockEventSource.instances[0];
+
+    act(() => {
+      source.simulateMessage({ kind: 'run', transition: { runId: 'r1', from: 'pending', to: 'planning' } });
+      source.simulateMessage({ kind: 'run', transition: { runId: 'r2', from: 'pending', to: 'in_progress' } });
+    });
+
+    expect(result.current.get('r1')).toBe('planning');
+    expect(result.current.get('r2')).toBe('in_progress');
+    expect(result.current.size).toBe(2);
+  });
+
+  it('should ignore non-run events', () => {
+    const { result } = renderHook(() => useRunEvents());
+    const source = MockEventSource.instances[0];
+
+    act(() => {
+      source.simulateMessage({
+        kind: 'budget_warning',
+        warning: { runId: 'r1', currentCostUsd: 8, budgetUsd: 10, percentUsed: 0.8 },
+      });
+    });
+
+    expect(result.current.size).toBe(0);
   });
 
   it('should close connection on unmount', () => {
@@ -91,12 +116,10 @@ describe('useRunEvents', () => {
     const initialSource = MockEventSource.instances[0];
     expect(initialSource.closed).toBe(false);
 
-    // Simulate tab hidden
     Object.defineProperty(document, 'hidden', { value: true, configurable: true });
     act(() => document.dispatchEvent(new Event('visibilitychange')));
     expect(initialSource.closed).toBe(true);
 
-    // Simulate tab visible
     Object.defineProperty(document, 'hidden', { value: false, configurable: true });
     act(() => document.dispatchEvent(new Event('visibilitychange')));
     expect(MockEventSource.instances).toHaveLength(2);
@@ -109,7 +132,6 @@ describe('useRunEvents', () => {
 
     act(() => source.onerror?.());
 
-    // Wait for reconnect timeout
     await act(async () => {
       await new Promise((r) => setTimeout(r, 1100));
     });

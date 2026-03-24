@@ -7,7 +7,7 @@ vi.mock('@/app/runs/queries', () => ({
 }));
 
 vi.mock('@/app/use-run-events.hook', () => ({
-  useRunEvents: () => [],
+  useRunEvents: () => new Map(),
 }));
 
 import { getRuns } from '@/app/runs/queries';

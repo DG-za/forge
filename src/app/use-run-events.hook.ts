@@ -1,10 +1,11 @@
-import type { StateChangeEvent } from '@/dispatcher/state-machine.types';
+import type { RunState, StateChangeEvent } from '@/dispatcher/state-machine.types';
 import { useEffect, useRef, useState } from 'react';
 
 const RECONNECT_DELAY_MS = 1000;
 
-export function useRunEvents(runId?: string): StateChangeEvent[] {
-  const [events, setEvents] = useState<StateChangeEvent[]>([]);
+/** Returns a map of runId → latest RunState, updated in real-time via SSE. */
+export function useRunEvents(runId?: string): Map<string, RunState> {
+  const [statusMap, setStatusMap] = useState<Map<string, RunState>>(new Map());
   const sourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
@@ -17,7 +18,9 @@ export function useRunEvents(runId?: string): StateChangeEvent[] {
 
       source.onmessage = (e) => {
         const event = JSON.parse(e.data) as StateChangeEvent;
-        setEvents((prev) => [...prev, event]);
+        if (event.kind !== 'run') return;
+        const { runId: id, to } = event.transition;
+        setStatusMap((prev) => new Map(prev).set(id, to));
       };
 
       source.onerror = () => {
@@ -49,5 +52,5 @@ export function useRunEvents(runId?: string): StateChangeEvent[] {
     };
   }, [runId]);
 
-  return events;
+  return statusMap;
 }
