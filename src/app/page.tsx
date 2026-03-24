@@ -1,7 +1,6 @@
 import { getRuns } from '@/app/runs/queries';
 import Link from 'next/link';
-import { RunCard } from './run-card.component';
-import { RunListEmpty } from './run-list-empty.component';
+import { Dashboard } from './dashboard.component';
 
 export default async function DashboardPage() {
   const runs = await getRuns();
@@ -17,15 +16,7 @@ export default async function DashboardPage() {
           New Run
         </Link>
       </div>
-      {runs.length === 0 ? (
-        <RunListEmpty />
-      ) : (
-        <div className="mt-4 space-y-3">
-          {runs.map((run) => (
-            <RunCard key={run.id} run={run} />
-          ))}
-        </div>
-      )}
+      <Dashboard runs={runs} />
     </section>
   );
 }

@@ -6,6 +6,10 @@ vi.mock('@/app/runs/queries', () => ({
   getRuns: vi.fn(),
 }));
 
+vi.mock('@/app/use-run-events.hook', () => ({
+  useRunEvents: () => new Map(),
+}));
+
 import { getRuns } from '@/app/runs/queries';
 import DashboardPage from './page';
 
