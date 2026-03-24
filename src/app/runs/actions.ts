@@ -21,6 +21,12 @@ export async function startRun(
     repo: formData.get('repo'),
     epicNumber: formData.get('epicNumber'),
     budgetUsd: formData.get('budgetUsd'),
+    plannerPlatform: formData.get('plannerPlatform'),
+    plannerModel: formData.get('plannerModel'),
+    coderPlatform: formData.get('coderPlatform'),
+    coderModel: formData.get('coderModel'),
+    reviewerPlatform: formData.get('reviewerPlatform'),
+    reviewerModel: formData.get('reviewerModel'),
   });
 
   if (!parsed.success) {
