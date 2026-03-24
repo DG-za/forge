@@ -31,6 +31,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Claude local files
+.claude/claude-prompt-*.txt
+.claude/launch-*.ps1
+
 # AI review and planning artifacts
 docs/reviews/
 docs/planning/
