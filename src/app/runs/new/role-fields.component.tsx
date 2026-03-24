@@ -1,3 +1,5 @@
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ModelOption, Platform } from './form.types';
 
 type Props = {
@@ -22,45 +24,43 @@ export function RoleFields({
   const label = role.charAt(0).toUpperCase() + role.slice(1);
 
   return (
-    <div className="bg-surface-alt rounded-md p-3">
-      <span className="text-text-muted mb-2 block text-xs font-medium tracking-wider uppercase">{label}</span>
+    <div className="bg-muted rounded-md p-3">
+      <span className="text-muted-foreground mb-2 block text-xs font-medium tracking-wider uppercase">{label}</span>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor={`${role}Platform`} className="text-text mb-1 block text-xs">
+          <Label htmlFor={`${role}Platform`} className="mb-1 text-xs">
             {label} platform
-          </label>
-          <select
-            id={`${role}Platform`}
-            name={`${role}Platform`}
-            value={platform}
-            onChange={(e) => onPlatformChange(e.target.value as Platform)}
-            className="bg-surface border-border text-text w-full rounded-md border px-2 py-1.5 text-sm"
-          >
-            {platformOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          </Label>
+          <Select name={`${role}Platform`} value={platform} onValueChange={(v) => v && onPlatformChange(v as Platform)}>
+            <SelectTrigger id={`${role}Platform`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {platformOptions.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label htmlFor={`${role}Model`} className="text-text mb-1 block text-xs">
+          <Label htmlFor={`${role}Model`} className="mb-1 text-xs">
             {label} model
-          </label>
-          <select
-            id={`${role}Model`}
-            name={`${role}Model`}
-            value={model}
-            onChange={(e) => onModelChange(e.target.value)}
-            className="bg-surface border-border text-text w-full rounded-md border px-2 py-1.5 text-sm"
-          >
-            {modelOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          </Label>
+          <Select name={`${role}Model`} value={model} onValueChange={(v) => v && onModelChange(v)}>
+            <SelectTrigger id={`${role}Model`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {modelOptions.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

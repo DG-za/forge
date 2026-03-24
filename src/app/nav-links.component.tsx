@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -16,15 +17,15 @@ export function NavLinks() {
       {LINKS.map(({ href, label }) => {
         const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
         return (
-          <Link
+          <Button
             key={href}
-            href={href}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              isActive ? 'bg-surface-alt text-accent' : 'text-text-muted hover:bg-surface hover:text-text'
-            }`}
+            variant="ghost"
+            size="sm"
+            className={isActive ? 'bg-muted text-primary' : 'text-muted-foreground'}
+            render={<Link href={href} />}
           >
             {label}
-          </Link>
+          </Button>
         );
       })}
     </nav>

@@ -1,12 +1,13 @@
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export function RunListEmpty() {
   return (
     <div className="py-16 text-center">
-      <p className="text-text-muted text-lg">No runs yet.</p>
-      <Link href="/runs/new" className="text-accent hover:text-accent-hover mt-2 inline-block text-sm font-medium">
+      <p className="text-muted-foreground text-lg">No runs yet.</p>
+      <Button variant="link" className="mt-2" render={<Link href="/runs/new" />}>
         Start one &rarr;
-      </Link>
+      </Button>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { formatCost } from '@/app/format.utils';
 import { StatusBadge } from '@/app/status-badge.component';
 import { useRunEvents } from '@/app/use-run-events.hook';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useState, useTransition } from 'react';
 import type { RunDetail } from '../runs.types';
@@ -31,7 +32,7 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
     setCancelError(null);
     startTransition(async () => {
       const result = await cancelRunAction(run.id);
-      if ('error' in result) setCancelError(result.error);
+      if ('error' in result && result.error) setCancelError(result.error);
     });
   }
 
@@ -42,7 +43,7 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
 
       {run.budgetUsd && (
         <div className="space-y-1">
-          <div className="text-text-muted flex justify-between text-xs">
+          <div className="text-muted-foreground flex justify-between text-xs">
             <span>
               {formatCost(run.totalCostUsd)} / {formatCost(run.budgetUsd)}
             </span>
@@ -54,8 +55,8 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
 
       {run.planSummary && (
         <section>
-          <h2 className="text-text mb-2 text-sm font-medium">Plan</h2>
-          <p className="text-text-muted text-sm">{run.planSummary}</p>
+          <h2 className="text-foreground mb-2 text-sm font-medium">Plan</h2>
+          <p className="text-muted-foreground text-sm">{run.planSummary}</p>
         </section>
       )}
 
@@ -63,7 +64,7 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
 
       {run.issues.length > 0 && (
         <section>
-          <h2 className="text-text mb-2 text-sm font-medium">
+          <h2 className="text-foreground mb-2 text-sm font-medium">
             Issues ({doneCount}/{run.issues.length} done)
           </h2>
           <div className="space-y-2">
@@ -74,7 +75,7 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
         </section>
       )}
 
-      <footer className="text-text-muted flex gap-4 text-xs">
+      <footer className="text-muted-foreground flex gap-4 text-xs">
         <span>Created {createdAtLabel}</span>
         <span>Updated {updatedAtLabel}</span>
       </footer>
@@ -98,20 +99,16 @@ function Header({
   return (
     <div className="flex items-start justify-between">
       <div>
-        <h1 className="text-text text-2xl font-bold">{run.repo}</h1>
-        <p className="text-text-muted mt-1 flex items-center gap-3 text-sm">
+        <h1 className="text-foreground text-2xl font-bold">{run.repo}</h1>
+        <p className="text-muted-foreground mt-1 flex items-center gap-3 text-sm">
           <span>Epic #{run.epicNumber}</span>
           <StatusBadge status={liveStatus} />
         </p>
       </div>
       {isActive && (
-        <button
-          onClick={onCancel}
-          disabled={isPending}
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button variant="destructive" size="sm" onClick={onCancel} disabled={isPending}>
           {isPending ? 'Cancelling...' : 'Cancel Run'}
-        </button>
+        </Button>
       )}
     </div>
   );
