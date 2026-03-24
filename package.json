@@ -5,9 +5,9 @@
   "description": "Fire-and-forget autonomous task runner — dispatches AI agents to work through GitHub epics",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 4017",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 4017",
     "lint": "next lint --dir src && eslint src/",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
@@ -20,11 +20,14 @@
     "@openai/codex-sdk": "^0.116.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
+    "@tailwindcss/postcss": "^4.2.2",
     "dotenv": "^17.3.1",
     "next": "^15.2.4",
     "pg": "^8.20.0",
+    "postcss": "^8.5.8",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
@@ -40,6 +43,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "^7.5.0",
     "testcontainers": "^11.13.0",
     "typescript": "^5.8.2",
