@@ -21,9 +21,12 @@ npm run typecheck    # TypeScript type checking
 
 ```
 src/
-  app/               # Next.js App Router — web UI
-  dispatcher/        # CLI task runner — dispatches agents to work through epics
-  shared/            # Shared types and utilities
+  app/               # Next.js App Router — thin route pages only
+  features/          # Feature modules — all domain logic
+  components/        # Shared UI components
+  dispatcher/        # Task runner — dispatches agents to work through epics
+  lib/               # Shared utilities and singletons
+  shared/            # Shared types and config
 docs/
   decisions/         # Architecture decision records
 ```
@@ -47,6 +50,10 @@ Keep communication **friendly, approachable, and technically precise**. Emojis a
 - **Never close an issue** unless the user explicitly says to close it. Code being complete is not the same as reviewed and approved.
 - **Never merge a PR** unless the user explicitly says to merge it.
 - Always wait for explicit confirmation before either action.
+
+### No Band-Aids 🩹
+
+Don't recommend a workaround when a proper fix exists. If the proper fix is out of scope, create an issue for it before applying the workaround — and add a comment in the code linking to that issue. Band-aids without tracked follow-ups become permanent.
 
 ### Out-of-Scope Issues 🔍
 
@@ -87,15 +94,22 @@ Don't let docs drift from reality. But code should be self-documenting — comme
 
 Document **decisions** so they don't get relitigated. Decision docs improve the development process over time.
 
-### File Size Limits 📏
+### File Size and Abstraction Limits 📏
 
-| File type | Target | Hard max | Notes |
+The line count itself is not the rule — **single-purpose and single-level-of-abstraction** is the rule. LOC is a useful signal, not the goal.
+
+**Why files get too long:** A file over ~150 lines is usually doing multiple things, or mixing responsibilities at different levels of abstraction. Low-level code and high-level code should not live in the same file. A class that orchestrates a workflow should not also contain the utility logic it calls.
+
+**The real test:** Can you describe what this file does in one sentence without using "and"? If not, split it — regardless of line count.
+
+| File type | Target | Soft max | Notes |
 |---|---|---|---|
 | Sequential logic (most files) | 100 lines | 150 lines | Files where you read top-to-bottom to understand the logic |
 | Collections (CRUD services, utility helpers) | 100 lines | 300 lines | Files where each function is independent — readers jump to a specific function |
 | Test files | No limit | — | Tests are exempt |
 
-If a file exceeds the target, look for extraction opportunities. If it exceeds the hard max, split it.
+- A file **under** 150 lines that mixes abstraction levels or has multiple responsibilities **still needs refactoring**.
+- A file **over** 150 lines that has a single purpose and single level of abstraction **can be justified** — but you must be able to explain why it can't be split.
 
 ### Naming Conventions 🏷️
 
@@ -329,7 +343,35 @@ When two domains need to interact:
 - **Extract a coordinator** only when the interaction becomes complex (3+ domains, multi-step workflows, or transactional boundaries).
 - Don't add event systems, message buses, or integration modules until you genuinely need decoupling.
 
+### Example Layout
+
+```
+src/
+├── auth/
+│   ├── index.ts
+│   ├── auth.service.ts
+│   └── auth.guard.ts
+├── users/
+│   ├── index.ts
+│   ├── users.service.ts
+│   └── users.controller.ts
+├── shared/
+│   ├── types.ts
+│   └── utils.ts
+└── main.ts
+```
+
+### When to Graduate
+
+Move to the large architecture tier when:
+- The codebase exceeds ~50k LOC.
+- You have 8+ domain modules with complex cross-domain interactions.
+- Cross-module coordination requires explicit orchestration or event-driven patterns.
+- You're spending real time debugging unexpected side effects from cross-domain coupling.
+
 ## Backend — General Rules ⚙️
+
+These rules apply to all backend projects regardless of framework.
 
 ### API Design
 
@@ -377,6 +419,58 @@ When two domains need to interact:
 
 ## Frontend — General Rules 🖥️
 
+These rules apply to all frontend projects regardless of framework.
+
+### Folder Organisation
+
+**Group by feature, not by file type.** This is the single most important structural decision. Every domain feature gets its own folder containing all related code — components, hooks/services, types, and utilities.
+
+```
+features/
+  jobs/
+    job-card.component.tsx       # Feature-specific component
+    job-actions.hook.ts          # Feature-specific hook
+    job.types.ts                 # Feature-specific types
+    job-detail/                  # Subfolder only for large sub-features
+      job-detail.component.tsx
+      job-detail-header.component.tsx
+  reviews/
+    review-card.component.tsx
+    review.types.ts
+    use-reviews.hook.ts
+```
+
+### Where things go
+
+Use this decision table to place files. Every framework-specific template may extend this with framework-specific rules, but the principle is universal.
+
+| What | Where | Example |
+|------|-------|---------|
+| Feature-specific components | `features/<name>/` | `features/jobs/job-card.component.tsx` |
+| Feature-specific hooks/services | `features/<name>/` | `features/jobs/use-jobs.hook.ts` |
+| Feature-specific types | `features/<name>/` | `features/jobs/job.types.ts` |
+| Shared UI primitives | `components/` or `components/ui/` | `components/ui/button.tsx` |
+| Shared components (cross-feature) | `components/` | `components/page-header.component.tsx` |
+| Shared hooks/services | `hooks/` or `services/` | `hooks/use-debounce.hook.ts` |
+| Shared types | `types/` | `types/api.types.ts` |
+| API client, generic utilities | `lib/` or `utils/` | `lib/api-client.ts` |
+
+**If a file belongs to a single feature, it goes in that feature's folder.** Only promote to shared folders when genuinely reused across multiple features.
+
+### Page composition
+
+- **Pages are thin orchestrators.** A page/route component should compose feature components and manage layout — not contain all the markup itself.
+- **Don't put feature logic in route/page files.** Pages import from `features/`, they don't implement features inline.
+- **Route folders stay lean.** In file-based routing frameworks (Next.js, SvelteKit), route folders contain the page file, layout, loading/error states, and nothing else. Feature code lives in `features/`.
+
+### Reference implementation
+
+When the first feature is built, name it explicitly in the project's AGENTS.md as the **canonical example**:
+
+> **`features/jobs/`** is the reference feature. When building a new feature, follow its structure.
+
+This gives the AI a concrete model to copy rather than inventing structure from scratch.
+
 ### Components
 
 - **One component per file.** No exceptions.
@@ -419,6 +513,8 @@ When two domains need to interact:
 
 ## Frontend — React ⚛️
 
+React-specific rules that augment the general frontend template.
+
 ### File Naming
 
 Use **kebab-case with type suffixes** for all files:
@@ -436,7 +532,7 @@ Use **kebab-case with type suffixes** for all files:
 
 - **Function components only.** No class components.
 - **One component per file.** Named export matching the file name.
-- **Feature-based structure.** Group by feature, not by type:
+- **Feature-based structure.** Group by feature, not by type. See the general frontend template for the full folder layout and "where things go" decision table.
   ```
   features/jobs/
     jobs-page.component.tsx
@@ -449,6 +545,7 @@ Use **kebab-case with type suffixes** for all files:
       job-detail-header.component.tsx
   ```
 - **Smart/dumb pattern:** Only page/feature-level containers manage state and side effects. Reusable components must be presentational — props in, callbacks out.
+- **No barrel files** (`index.ts` re-exports). Import directly from the source file.
 
 ### File Ordering
 
@@ -476,7 +573,7 @@ Within a component file, order sections top to bottom:
 
 ### Props
 
-- **TypeScript interfaces for props.** Define a `Props` type for every component. Always at module level — never inside function bodies.
+- **TypeScript interfaces for props.** Define a `Props` type (or `<ComponentName>Props`) for every component. Always at module level — never inside function bodies.
 - **Destructure props** in the function signature for readability.
 - **Default values via destructuring**, not `defaultProps`.
 - **`children` for composition.** Prefer `children` over render props or deeply nested config objects.
@@ -484,7 +581,7 @@ Within a component file, order sections top to bottom:
 ### Styling
 
 - **Tailwind CSS or CSS Modules** — pick one and use it consistently.
-- **No inline `style` objects** except for truly dynamic values.
+- **No inline `style` objects** except for truly dynamic values (e.g. computed widths).
 - **`className` composition** — use `clsx` or `cn` helper for conditional classes.
 
 ### Patterns to Avoid
@@ -505,23 +602,80 @@ Within a component file, order sections top to bottom:
 
 ## Frontend — Next.js ▲
 
+Next.js-specific rules that augment the general frontend and React templates.
+
+### Project Structure
+
+Next.js file-based routing can tempt you into dumping all code in route folders. **Don't.** Route folders are for routing — feature code lives in `features/`.
+
+```
+src/
+  app/                    # Route tree — thin pages only
+    (dashboard)/          # Route group
+      page.tsx            # Composes features/dashboard/ components
+      layout.tsx
+    runs/
+      [id]/
+        page.tsx          # Composes features/runs/ components
+        loading.tsx
+        not-found.tsx
+      new/
+        page.tsx
+    api/                  # API routes (webhooks, SSE, external integrations)
+    layout.tsx            # Root layout
+    globals.css
+  features/               # Feature modules — all domain logic lives here
+    dashboard/
+      dashboard-metrics.component.tsx
+      use-dashboard-stats.hook.ts
+      dashboard.types.ts
+    runs/
+      components/         # Optional subfolder if feature has many components
+        run-card.component.tsx
+        run-form.component.tsx
+      run.types.ts
+      use-runs.hook.ts
+      run-actions.ts      # Server actions for this feature
+  components/             # Shared UI (shadcn/ui, cross-feature primitives)
+    ui/
+    nav-bar.component.tsx
+    page-header.component.tsx
+  hooks/                  # Shared hooks
+  lib/                    # API client, utilities
+  types/                  # Shared types
+```
+
+### Where things go (Next.js-specific)
+
+| What | Where | NOT here |
+|------|-------|----|
+| Route pages, layouts, loading/error | `app/<route>/` | — |
+| Feature components, hooks, types | `features/<name>/` | ~~`app/<route>/`~~ |
+| Server Actions for a feature | `features/<name>/` | ~~`app/actions.ts`~~ |
+| API routes (SSE, webhooks) | `app/api/` | — |
+| Shared queries/data utils | `lib/` | ~~`app/queries.ts`~~ |
+| Shared types | `types/` | ~~`app/<name>.types.ts`~~ |
+| Shared validation | `lib/` | ~~`app/validation.ts`~~ |
+
+**The `app/` directory should contain almost no `.ts` files that aren't `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, or `route.ts`.** If you're about to create a utility, type, hook, or component file inside `app/`, stop and put it in `features/`, `lib/`, or `components/` instead.
+
 ### App Router
 
 - **Use the App Router** (`app/` directory), not the Pages Router.
 - **File conventions:** `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`.
-- **Layouts for shared UI.** Use `layout.tsx` for headers, navs, and wrappers. Layouts don't re-render on navigation.
+- **Layouts for shared UI.** Use `layout.tsx` for headers, navs, and wrappers. Layouts don't re-render on navigation — put persistent UI here.
 - **`loading.tsx`** for route-level loading states. Prefer this over manual loading spinners.
 
 ### Server vs Client Components
 
 - **Server Components by default.** Every component is a Server Component unless it needs interactivity.
-- **Add `'use client'` only when needed:** event handlers, `useState`, `useEffect`, browser APIs.
+- **Add `'use client'` only when needed:** event handlers, `useState`, `useEffect`, browser APIs, or third-party client-only libraries.
 - **Push `'use client'` as far down the tree as possible.** Don't make a whole page client-side because one button needs `onClick`.
-- **Server Components can import Client Components**, but not the other way around.
+- **Server Components can import Client Components**, but not the other way around. Pass server data to client components via props.
 
 ### Data Fetching
 
-- **Fetch in Server Components** using `async/await` directly.
+- **Fetch in Server Components** using `async/await` directly. No need for `useEffect` or client-side fetching for initial data.
 - **Server Actions for mutations.** Use the `'use server'` directive for form submissions and data mutations.
 - **`revalidatePath` or `revalidateTag`** after mutations to refresh cached data.
 - **Avoid client-side `fetch` for initial page data.** Let Server Components handle it.
@@ -529,26 +683,28 @@ Within a component file, order sections top to bottom:
 ### Routing
 
 - **File-based routing.** Each folder in `app/` is a route segment.
-- **Dynamic routes** with `[param]` folders.
+- **Dynamic routes** with `[param]` folders. Use `generateStaticParams` for static generation where applicable.
 - **Route groups** with `(groupName)` for organising routes without affecting the URL.
+- **Parallel routes and intercepting routes** only when genuinely needed — they add complexity.
 
 ### API Routes
 
 - **`route.ts` for API endpoints** when needed (webhooks, external integrations).
-- **Prefer Server Actions over API routes** for internal mutations.
+- **Prefer Server Actions over API routes** for internal mutations. API routes are for external consumers.
 - **Type-safe request/response** — validate inputs, return consistent shapes.
 
 ### Styling
 
 - **Tailwind CSS** is the recommended default for Next.js projects.
+- **CSS Modules** as an alternative if Tailwind doesn't fit.
 - **`globals.css`** for resets, CSS custom properties, and base styles only.
 
 ### Performance
 
-- **`next/image`** for all images.
-- **`next/link`** for all internal navigation.
-- **`next/font`** for fonts.
-- **Dynamic imports** (`next/dynamic`) for heavy client components.
+- **`next/image`** for all images — automatic optimisation and lazy loading.
+- **`next/link`** for all internal navigation — enables prefetching.
+- **`next/font`** for fonts — self-hosted, no layout shift.
+- **Dynamic imports** (`next/dynamic`) for heavy client components that aren't needed on initial render.
 
 ### Environment Variables
 
@@ -556,38 +712,63 @@ Within a component file, order sections top to bottom:
 - **No prefix** for server-only variables (API keys, secrets).
 - **Never expose secrets** with the `NEXT_PUBLIC_` prefix.
 
+### Testing
+
+- **Playwright for E2E tests.** Test user-facing workflows end-to-end.
+- **React Testing Library + Vitest** for component tests.
+- **Test Server Components** by testing their output or the pages that render them (E2E), not by importing them directly in unit tests.
+
 ## Testing 🧪
+
+### Test Location
+
+Tests live in a **separate top-level folder** (e.g. `test/`, `tests/`, `__tests__/`) outside of `src/`. Test code and application code must not mix — no test files inside `src/`.
 
 ### What to Test
 
-Test code that **makes decisions**: branching, data transformation, validation, conditional logic.
+Test code that **makes decisions**: branching, data transformation, validation, conditional logic. These are the places bugs hide.
 
 - Test **public interfaces**. Verify private logic through public-facing code.
-- Test **behaviour**, not implementation.
+- Test **behaviour**, not implementation. If you refactor internals, tests should still pass.
 
 ### What Not to Test
 
-- **Object shape**, **trivial accessors**, **library behaviour**, **code that merely describes shape**.
+- **Object shape** — don't test that a DTO has the right fields.
+- **Trivial accessors** — getters, setters, simple pass-throughs.
+- **Library behaviour** — don't verify that `Array.filter` works.
+- **Code that merely describes shape** — object literals, type definitions, trivial delegation.
 
 ### Test Quality
 
 - **Names follow `should ...` convention** and verify a single behaviour each.
-- **Arrange / Act / Assert** — blank line between each phase.
-- **Assert the minimum** needed to prove the claim.
+- **Arrange / Act / Assert** — blank line between each phase. Keep each phase short.
+- **Assert the minimum** needed to prove the claim. Extra assertions obscure intent and couple tests to unrelated details.
 
 ### When to Skip Tests
 
 - **Unlikely edge cases.** Don't test for scenarios that won't happen in practice.
-- **Coverage numbers don't matter.** 40% meaningful coverage beats 90% trivial coverage.
+- **Small utility projects.** Manual testing is acceptable when the blast radius is small.
+- **Coverage numbers don't matter.** A project with 40% meaningful coverage is better than 90% trivial coverage.
+
+### When Edge Cases Are Ambiguous
+
+Ask for clarification rather than guessing. Don't silently pick a behaviour — make it an explicit decision.
+
+### Bug Fixes
+
+When a bug is detected, **first write the test that reproduces the bug**, then fix the code. The test must fail before the fix and pass after. This proves the fix works and prevents regressions.
 
 ### Integration and E2E Tests
 
-- Integration tests verify real interactions. E2E tests verify user-facing workflows.
+- Integration tests verify real interactions (database, APIs). Use them for code that touches external systems.
+- E2E tests verify user-facing workflows. Include them for features with a UI.
 - Both are more valuable than unit tests for catching real bugs, but slower — use judiciously.
 
 ## Code Reviews 🔍
 
 ### Scoring System
+
+Rate every PR on four dimensions. Higher is better.
 
 | Score | Emoji | Meaning |
 |---|---|---|
@@ -597,20 +778,90 @@ Test code that **makes decisions**: branching, data transformation, validation, 
 | 7–8 | 🟢 | Good — minor suggestions only |
 | 9–10 | 💚 | Excellent — no meaningful issues |
 
+#### Dimensions
+
+| Dimension | What it measures |
+|---|---|
+| **Issue coverage** | How well does the PR address the linked issue's goals and acceptance criteria? |
+| **Architecture direction** | Are boundaries, dependencies, and module structure heading the right way? |
+| **Readability / maintainability** | Can a developer understand and safely change this code? |
+| **Future change resilience** | How easy will it be to extend or modify this code later? |
+
+Present scores in a table:
+
+```markdown
+| Dimension | Score |
+|---|---|
+| Issue coverage | 💚 9 |
+| Architecture direction | 🟢 7 |
+| Readability / maintainability | 🟡 6 |
+| Future change resilience | 🟢 8 |
+```
+
+Include a concrete refactor suggestion whenever any score is below 7.
+
 ### Review Priority Order
+
+Apply this priority order in every review:
 
 1. **Architecture direction** and boundary quality
 2. **Readability** and maintainability
 3. **Correctness** issues with meaningful behavioural impact
 4. **Test strategy** for decision logic and behaviour changes
-5. **Low-priority nits** (max 3)
+5. **Low-priority nits** (max 3 — typos, formatting, style already covered by tooling)
 
 ### Code Smells Checklist
 
-God-classes, deep nesting, unnecessary coupling, dead code, duplicated logic, long functions, magic values, inconsistent abstraction, mutable shared state, leaky abstractions, shotgun surgery.
+Flag any of these when spotted:
+
+- God-classes or monolithic modules
+- Deeply nested conditionals or long case statements
+- Unnecessary coupling between classes
+- Dead code (unused variables, unreachable branches, commented-out code)
+- Duplicated logic that should be extracted
+- Long functions doing too many things
+- Magic numbers/strings without named constants
+- Inconsistent abstraction levels within a function
+- Mutable shared state modified from multiple places
+- Leaky abstractions exposing implementation details
+- Shotgun surgery (one logical change scattered across many files)
 
 ### Suppression Rules
 
-- Don't report style enforced by tooling.
-- Don't request tests for library behaviour.
-- Naming is a readability concern, not a nit.
+- **Don't report style enforced by tooling.** If ESLint/Prettier/Ruff already handles it, skip it.
+- **Don't request tests for library behaviour.** Only test code that makes decisions.
+- **Naming is a readability concern, not a nit.** Bad names are priority issues.
+- Treat consistency as a maintainability concern, not cosmetic.
+
+### PR Review Output Contract
+
+When asked to review a PR, produce findings in this order:
+
+1. **Issue goal summary** — 2–4 sentences summarising the linked issue's objective and acceptance criteria.
+2. **Scores** — table format (see above).
+3. **Architecture verdict** — 3–6 bullets on structure, boundaries, and direction.
+4. **Priority issues** — numbered blocks, ordered by implementation priority.
+5. **Test strategy gaps** — only for decision logic and behaviour (issue blocks).
+6. **Low-priority nits** — optional, max 3 (issue blocks).
+
+#### Issue Block Format
+
+```markdown
+### 1. Short issue name — Severity (high/medium/low)
+
+**File:** `path/to/file.ts:42`
+
+Problem description — what's wrong and why it matters.
+
+\`\`\`typescript
+// The problematic code
+\`\`\`
+
+**Suggested fix:** What to change and why.
+```
+
+### Commit Message Conventions
+
+- Short imperative subject line: "Add user auth", not "Added user auth".
+- Body (optional): explain **why**, not what. The diff shows what changed.
+- Reference the issue number where applicable.
