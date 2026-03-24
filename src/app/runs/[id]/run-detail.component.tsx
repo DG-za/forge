@@ -3,6 +3,7 @@
 import { formatCost } from '@/app/format.utils';
 import { StatusBadge } from '@/app/status-badge.component';
 import { useRunEvents } from '@/app/use-run-events.hook';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useState, useTransition } from 'react';
 import type { RunDetail } from '../runs.types';
@@ -31,7 +32,7 @@ export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
     setCancelError(null);
     startTransition(async () => {
       const result = await cancelRunAction(run.id);
-      if ('error' in result) setCancelError(result.error);
+      if ('error' in result && result.error) setCancelError(result.error);
     });
   }
 
@@ -105,13 +106,9 @@ function Header({
         </p>
       </div>
       {isActive && (
-        <button
-          onClick={onCancel}
-          disabled={isPending}
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button variant="destructive" size="sm" onClick={onCancel} disabled={isPending}>
           {isPending ? 'Cancelling...' : 'Cancel Run'}
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -1,5 +1,8 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useActionState, useState } from 'react';
 import type { ActionResult } from '../runs.types';
 import { DEFAULT_BUDGET_USD, DEFAULT_ROLES, MODEL_OPTIONS, PLATFORM_OPTIONS, type Platform } from './form.types';
@@ -26,45 +29,31 @@ export function RunForm({ action }: Props) {
   return (
     <form action={formAction} className="space-y-6">
       {state?.error && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-4 py-3 text-sm">
           {state.error}
         </div>
       )}
 
       <fieldset className="space-y-4">
         <div>
-          <label htmlFor="repo" className="text-text mb-1 block text-sm font-medium">
+          <Label htmlFor="repo" className="mb-1">
             Repository
-          </label>
-          <input
-            id="repo"
-            name="repo"
-            type="text"
-            required
-            placeholder="owner/repo"
-            className="bg-surface border-border text-text placeholder:text-text-muted w-full rounded-md border px-3 py-2 text-sm"
-          />
+          </Label>
+          <Input id="repo" name="repo" type="text" required placeholder="owner/repo" />
         </div>
 
         <div>
-          <label htmlFor="epicNumber" className="text-text mb-1 block text-sm font-medium">
+          <Label htmlFor="epicNumber" className="mb-1">
             Epic number
-          </label>
-          <input
-            id="epicNumber"
-            name="epicNumber"
-            type="number"
-            required
-            min={1}
-            className="bg-surface border-border text-text w-full rounded-md border px-3 py-2 text-sm"
-          />
+          </Label>
+          <Input id="epicNumber" name="epicNumber" type="number" required min={1} />
         </div>
 
         <div>
-          <label htmlFor="budgetUsd" className="text-text mb-1 block text-sm font-medium">
+          <Label htmlFor="budgetUsd" className="mb-1">
             Budget (USD)
-          </label>
-          <input
+          </Label>
+          <Input
             id="budgetUsd"
             name="budgetUsd"
             type="number"
@@ -73,13 +62,12 @@ export function RunForm({ action }: Props) {
             max={500}
             step={0.01}
             defaultValue={DEFAULT_BUDGET_USD}
-            className="bg-surface border-border text-text w-full rounded-md border px-3 py-2 text-sm"
           />
         </div>
       </fieldset>
 
       <fieldset className="space-y-4">
-        <legend className="text-text text-sm font-medium">Model configuration</legend>
+        <legend className="text-sm font-medium">Model configuration</legend>
         {(['planner', 'coder', 'reviewer'] as const).map((role) => (
           <RoleFields
             key={role}
@@ -94,13 +82,9 @@ export function RunForm({ action }: Props) {
         ))}
       </fieldset>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="bg-accent hover:bg-accent-hover disabled:bg-accent-muted w-full rounded-md px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed"
-      >
+      <Button type="submit" disabled={isPending} className="w-full">
         {isPending ? 'Starting...' : 'Start Run'}
-      </button>
+      </Button>
     </form>
   );
 }
