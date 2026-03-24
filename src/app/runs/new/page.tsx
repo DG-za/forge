@@ -1,5 +1,5 @@
-import { RunForm } from './run-form.component';
-import { startRunAction } from './start-run.action';
+import { RunForm } from '@/features/runs/new/run-form.component';
+import { startRunAction } from '@/features/runs/new/start-run.action';
 
 export default function NewRunPage() {
   return (

@@ -1,7 +1,7 @@
-import { getRuns } from '@/app/runs/queries';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button.component';
+import { Dashboard } from '@/features/runs/components/dashboard.component';
+import { getRuns } from '@/features/runs/run.queries';
 import Link from 'next/link';
-import { Dashboard } from './dashboard.component';
 
 export default async function DashboardPage() {
   const runs = await getRuns();

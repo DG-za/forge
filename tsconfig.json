@@ -41,6 +41,6 @@
     "node_modules",
     "dist",
     ".next",
-    "src/**/tests/**"
+    "tests/**"
   ]
 }

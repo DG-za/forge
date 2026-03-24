@@ -3,7 +3,7 @@ import { Geist } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import '@/app/globals.css';
-import { NavBar } from '@/app/nav-bar.component';
+import { NavBar } from '@/components/nav-bar.component';
 
 const geistSans = Geist({
   subsets: ['latin'],
