@@ -12,7 +12,7 @@ export function PlanTaskList({ tasks, issues }: { tasks: PlanTask[]; issues: Iss
 
   return (
     <section>
-      <h2 className="text-text mb-2 text-sm font-medium">Plan tasks</h2>
+      <h2 className="text-foreground mb-2 text-sm font-medium">Plan tasks</h2>
       <div className="space-y-2">
         {tasks.map((task) => {
           const issue = task.issueNumber ? issueByNumber.get(task.issueNumber) : undefined;
@@ -25,13 +25,13 @@ export function PlanTaskList({ tasks, issues }: { tasks: PlanTask[]; issues: Iss
 
 function PlanTaskRow({ task, issue }: { task: PlanTask; issue?: Issue }) {
   return (
-    <Collapsible className="bg-surface border-border rounded-lg border">
+    <Collapsible className="bg-card border-border rounded-lg border">
       <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left">
         <div className="flex items-center gap-3">
-          <ChevronRight className="text-text-muted h-4 w-4 transition-transform [[data-state=open]>&]:rotate-90" />
-          <span className="text-text-muted text-xs">{task.orderIndex + 1}.</span>
-          <span className="text-text text-sm font-medium">{task.title}</span>
-          <Badge variant="outline" className="text-text-muted text-xs capitalize">
+          <ChevronRight className="text-muted-foreground h-4 w-4 transition-transform [[data-state=open]>&]:rotate-90" />
+          <span className="text-muted-foreground text-xs">{task.orderIndex + 1}.</span>
+          <span className="text-foreground text-sm font-medium">{task.title}</span>
+          <Badge variant="outline" className="text-muted-foreground text-xs capitalize">
             {task.complexity}
           </Badge>
         </div>
@@ -40,7 +40,7 @@ function PlanTaskRow({ task, issue }: { task: PlanTask; issue?: Issue }) {
       <CollapsibleContent>
         <div className="border-border border-t px-4 py-3">
           {task.acceptanceCriteria.length > 0 && (
-            <ul className="text-text-muted list-disc space-y-1 pl-5 text-xs">
+            <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-xs">
               {task.acceptanceCriteria.map((ac, i) => (
                 <li key={i}>{ac}</li>
               ))}

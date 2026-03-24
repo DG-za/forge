@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   return (
     <section>
       <div className="flex items-center justify-between">
-        <h1 className="text-text text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-foreground text-2xl font-bold">Dashboard</h1>
         <Button render={<Link href="/runs/new" />}>New Run</Button>
       </div>
       <Dashboard runs={runs} />

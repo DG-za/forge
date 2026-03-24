@@ -21,7 +21,7 @@ export function NavLinks() {
             key={href}
             variant="ghost"
             size="sm"
-            className={isActive ? 'bg-muted text-accent' : 'text-muted-foreground'}
+            className={isActive ? 'bg-muted text-primary' : 'text-muted-foreground'}
             render={<Link href={href} />}
           >
             {label}

@@ -29,17 +29,16 @@ describe('RunForm', () => {
   });
 
   it('should have sensible defaults', () => {
-    const { container } = renderForm();
+    renderForm();
 
     expect(screen.getByLabelText<HTMLInputElement>('Budget (USD)').value).toBe('10');
-    // shadcn Select renders hidden inputs with the name prop for form submission
-    expect(container.querySelector<HTMLInputElement>('input[name="plannerPlatform"]')?.value).toBe('claude');
-    expect(container.querySelector<HTMLInputElement>('input[name="coderPlatform"]')?.value).toBe('openai');
-    expect(container.querySelector<HTMLInputElement>('input[name="reviewerPlatform"]')?.value).toBe('claude');
+    expect(screen.getByLabelText('Planner platform').textContent?.toLowerCase()).toContain('claude');
+    expect(screen.getByLabelText('Coder platform').textContent?.toLowerCase()).toContain('openai');
+    expect(screen.getByLabelText('Reviewer platform').textContent?.toLowerCase()).toContain('claude');
   });
 
   it('should update model options when platform changes', async () => {
-    const { container } = renderForm();
+    renderForm();
     const user = userEvent.setup();
 
     // Open the coder platform select and pick Claude
@@ -47,8 +46,8 @@ describe('RunForm', () => {
     await user.click(coderPlatform);
     await user.click(await screen.findByRole('option', { name: 'Claude' }));
 
-    // The hidden input for coder model should now have a Claude model value
-    expect(container.querySelector<HTMLInputElement>('input[name="coderModel"]')?.value).toContain('claude-');
+    // The coder model trigger should now show a Claude model
+    expect(screen.getByLabelText('Coder model').textContent).toContain('claude-');
   });
 
   it('should render a submit button', () => {
