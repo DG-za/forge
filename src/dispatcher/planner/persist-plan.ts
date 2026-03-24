@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PrismaClient } from '../../../generated/prisma/client';
 import type { Plan } from './planner.types';
 
 export async function persistPlan(prisma: PrismaClient, runId: string, plan: Plan): Promise<void> {

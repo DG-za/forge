@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../generated/prisma/client.js';
+import type { PrismaClient } from '../../generated/prisma/client';
 import { transitionIssue } from './issue-state-machine';
 import { transitionRun } from './run-state-machine';
 import type { IssueState, IssueTransition, RunState, RunTransition, StateChangeListener } from './state-machine.types';

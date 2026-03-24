@@ -15,6 +15,15 @@ function buildMockApi(overrides: Partial<PipelineApi> = {}): PipelineApi {
 const stubBuilder: RunInputBuilder = (input) =>
   ({ config: { repo: input.repo, epicNumber: input.epicNumber, maxBudgetUsd: input.budgetUsd } }) as never;
 
+const validRoleFields = {
+  plannerPlatform: 'claude',
+  plannerModel: 'claude-sonnet-4-6',
+  coderPlatform: 'openai',
+  coderModel: 'gpt-4.1',
+  reviewerPlatform: 'claude',
+  reviewerModel: 'claude-sonnet-4-6',
+};
+
 function formData(entries: Record<string, string>): FormData {
   const fd = new FormData();
   for (const [key, value] of Object.entries(entries)) {
@@ -23,15 +32,21 @@ function formData(entries: Record<string, string>): FormData {
   return fd;
 }
 
+function validFormData(overrides: Record<string, string> = {}): FormData {
+  return formData({
+    repo: 'owner/repo',
+    epicNumber: '10',
+    budgetUsd: '25',
+    ...validRoleFields,
+    ...overrides,
+  });
+}
+
 describe('startRun', () => {
   it('should validate input and return runId on success', async () => {
     const api = buildMockApi();
 
-    const result = await startRun(
-      formData({ repo: 'owner/repo', epicNumber: '10', budgetUsd: '25' }),
-      api,
-      stubBuilder,
-    );
+    const result = await startRun(validFormData(), api, stubBuilder);
 
     expect(result).toEqual({ runId: 'new-run-id' });
     expect(api.startRun).toHaveBeenCalledOnce();
@@ -40,7 +55,7 @@ describe('startRun', () => {
   it('should return error for invalid repo format', async () => {
     const api = buildMockApi();
 
-    const result = await startRun(formData({ repo: 'invalid', epicNumber: '10', budgetUsd: '25' }), api);
+    const result = await startRun(validFormData({ repo: 'invalid' }), api);
 
     expect(result).toEqual({ error: expect.stringContaining('owner/name') });
     expect(api.startRun).not.toHaveBeenCalled();
@@ -58,7 +73,7 @@ describe('startRun', () => {
   it('should return error for budget out of range', async () => {
     const api = buildMockApi();
 
-    const result = await startRun(formData({ repo: 'a/b', epicNumber: '1', budgetUsd: '999' }), api);
+    const result = await startRun(validFormData({ budgetUsd: '999' }), api);
 
     expect(result).toHaveProperty('error');
     expect(api.startRun).not.toHaveBeenCalled();
@@ -67,7 +82,7 @@ describe('startRun', () => {
   it('should return error when PipelineApi.startRun throws', async () => {
     const api = buildMockApi({ startRun: vi.fn().mockRejectedValue(new Error('DB down')) });
 
-    const result = await startRun(formData({ repo: 'a/b', epicNumber: '1', budgetUsd: '10' }), api, stubBuilder);
+    const result = await startRun(validFormData(), api, stubBuilder);
 
     expect(result).toEqual({ error: 'DB down' });
   });
@@ -75,9 +90,11 @@ describe('startRun', () => {
   it('should return error when buildRunInput is not implemented', async () => {
     const api = buildMockApi();
 
-    const result = await startRun(formData({ repo: 'a/b', epicNumber: '1', budgetUsd: '10' }), api);
+    const result = await startRun(validFormData(), api);
 
-    expect(result).toEqual({ error: 'Run input construction not yet implemented for a/b#1' });
+    expect(result).toEqual({
+      error: expect.stringContaining('No RunInputBuilder provided'),
+    });
     expect(api.startRun).not.toHaveBeenCalled();
   });
 });

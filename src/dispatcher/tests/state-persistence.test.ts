@@ -3,7 +3,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import { execSync } from 'child_process';
 import pg from 'pg';
 import { describe, expect, it, vi } from 'vitest';
-import { PrismaClient } from '../../../generated/prisma/client.js';
+import { PrismaClient } from '../../../generated/prisma/client';
 import { InvalidTransitionError } from '../invalid-transition.error';
 import type { StateChangeListener } from '../state-machine.types';
 import { persistIssueTransition, persistRunTransition } from '../state-persistence';

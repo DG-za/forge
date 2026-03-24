@@ -1,10 +1,10 @@
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PrismaClient } from '../../../generated/prisma/client';
 import type { IssueFetcher } from '../planner/planner.types';
 import type { PipelineConfig } from './pipeline.types';
 import { computeResumeState, type ResumeState } from './resume-run';
 import { runPipeline } from './run-pipeline';
 
-type RunInput = {
+export type RunInput = {
   config: PipelineConfig;
   issueFetcher: IssueFetcher;
   getDiff: () => Promise<string>;

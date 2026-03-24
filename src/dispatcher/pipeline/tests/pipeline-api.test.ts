@@ -3,7 +3,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import { execSync } from 'child_process';
 import pg from 'pg';
 import { describe, expect, it, vi } from 'vitest';
-import { PrismaClient } from '../../../../generated/prisma/client.js';
+import { PrismaClient } from '../../../../generated/prisma/client';
 import type { AgentMessage, AgentRunner, Cost } from '../../agent-runner.types';
 import type { CommandExecutor } from '../../coder/coder.types';
 import type { IssueFetcher, Plan } from '../../planner/planner.types';
