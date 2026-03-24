@@ -1,35 +1,44 @@
 'use client';
 
-import { formatCost, formatRelativeTime } from '@/app/format.utils';
+import { formatCost } from '@/app/format.utils';
 import { StatusBadge } from '@/app/status-badge.component';
 import { useRunEvents } from '@/app/use-run-events.hook';
 import { Progress } from '@/components/ui/progress';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import type { RunDetail } from '../runs.types';
+import { TERMINAL_RUN_STATUSES } from '../runs.types';
 import { cancelRunAction } from './cancel-run.action';
 import { IssueCard } from './issue-card.component';
 import { PlanTaskList } from './plan-task-list.component';
 
-const TERMINAL_STATUSES = new Set(['completed', 'failed']);
+type Props = {
+  run: RunDetail;
+  createdAtLabel: string;
+  updatedAtLabel: string;
+};
 
-export function RunDetailView({ run }: { run: RunDetail }) {
+export function RunDetailView({ run, createdAtLabel, updatedAtLabel }: Props) {
   const statusMap = useRunEvents(run.id);
   const liveStatus = statusMap.get(run.id) ?? run.status;
-  const isActive = !TERMINAL_STATUSES.has(liveStatus);
+  const isActive = !TERMINAL_RUN_STATUSES.has(liveStatus);
   const [isPending, startTransition] = useTransition();
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const budgetPercent = run.budgetUsd ? Math.min((run.totalCostUsd / run.budgetUsd) * 100, 100) : 0;
   const doneCount = run.issues.filter((i) => i.status === 'done').length;
 
   function handleCancel() {
+    setCancelError(null);
     startTransition(async () => {
-      await cancelRunAction(run.id);
+      const result = await cancelRunAction(run.id);
+      if ('error' in result) setCancelError(result.error);
     });
   }
 
   return (
     <div className="space-y-6">
       <Header run={run} liveStatus={liveStatus} isActive={isActive} isPending={isPending} onCancel={handleCancel} />
+      {cancelError && <p className="text-sm text-red-400">{cancelError}</p>}
 
       {run.budgetUsd && (
         <div className="space-y-1">
@@ -66,8 +75,8 @@ export function RunDetailView({ run }: { run: RunDetail }) {
       )}
 
       <footer className="text-text-muted flex gap-4 text-xs">
-        <span>Created {formatRelativeTime(run.createdAt)}</span>
-        <span>Updated {formatRelativeTime(run.updatedAt)}</span>
+        <span>Created {createdAtLabel}</span>
+        <span>Updated {updatedAtLabel}</span>
       </footer>
     </div>
   );

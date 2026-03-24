@@ -44,3 +44,5 @@ export type RunDetail = {
 };
 
 export type ActionResult<T = void> = { error: string } | ({ error?: never } & T);
+
+export const TERMINAL_RUN_STATUSES = new Set(['completed', 'failed']);
