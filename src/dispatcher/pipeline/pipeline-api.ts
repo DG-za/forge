@@ -1,5 +1,6 @@
 import type { PrismaClient } from '../../../generated/prisma/client';
 import type { IssueFetcher } from '../planner/planner.types';
+import type { StateChangeListener } from '../state-machine.types';
 import type { PipelineConfig } from './pipeline.types';
 import { computeResumeState, type ResumeState } from './resume-run';
 import { runPipeline } from './run-pipeline';
@@ -11,7 +12,7 @@ export type RunInput = {
 };
 
 export type RunStatus = {
-  state: 'running' | 'completed' | 'failed' | 'pending' | 'planning';
+  state: 'pending' | 'planning' | 'in_progress' | 'completed' | 'failed';
   error?: string;
 };
 
@@ -22,7 +23,7 @@ export type PipelineApi = {
   resumeRun(runId: string, input: RunInput): Promise<boolean>;
 };
 
-export function createPipelineApi(prisma: PrismaClient): PipelineApi {
+export function createPipelineApi(prisma: PrismaClient, onStateChange?: StateChangeListener): PipelineApi {
   const controllers = new Map<string, AbortController>();
 
   return { startRun, getRunStatus, cancelRun, resumeRun };
@@ -46,8 +47,8 @@ export function createPipelineApi(prisma: PrismaClient): PipelineApi {
     if (!run) return null;
 
     const isTerminal = run.status === 'completed' || run.status === 'failed';
-    if (controllers.has(runId) && !isTerminal) return { state: 'running' };
-    return { state: run.status === 'in_progress' ? 'running' : (run.status as RunStatus['state']) };
+    if (controllers.has(runId) && !isTerminal) return { state: 'in_progress' };
+    return { state: run.status as RunStatus['state'] };
   }
 
   async function cancelRun(runId: string): Promise<boolean> {
@@ -79,8 +80,17 @@ export function createPipelineApi(prisma: PrismaClient): PipelineApi {
   function launchPipeline(runId: string, input: RunInput, resumeState?: ResumeState): void {
     const controller = new AbortController();
     controllers.set(runId, controller);
+    const config = onStateChange ? { ...input.config, onStateChange } : input.config;
 
-    runPipeline({ runId, ...input, signal: controller.signal, prisma, resumeState })
+    runPipeline({
+      runId,
+      config,
+      issueFetcher: input.issueFetcher,
+      getDiff: input.getDiff,
+      signal: controller.signal,
+      prisma,
+      resumeState,
+    })
       .catch((err) => {
         console.error(`Pipeline ${runId} failed:`, err);
         prisma.run.update({ where: { id: runId }, data: { status: 'failed' } }).catch(() => {});

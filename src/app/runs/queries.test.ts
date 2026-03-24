@@ -119,12 +119,12 @@ describe('getRun', () => {
 
 describe('getRunStatus', () => {
   it('should delegate to PipelineApi.getRunStatus', async () => {
-    const api = buildMockApi({ state: 'running' });
+    const api = buildMockApi({ state: 'in_progress' });
 
     const status = await getRunStatus('run-1', api);
 
     expect(api.getRunStatus).toHaveBeenCalledWith('run-1');
-    expect(status).toEqual({ state: 'running' });
+    expect(status).toEqual({ state: 'in_progress' });
   });
 
   it('should return null for unknown run', async () => {

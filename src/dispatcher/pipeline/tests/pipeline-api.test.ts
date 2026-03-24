@@ -125,7 +125,7 @@ describe('startRun', () => {
     const runId = await api.startRun(testInput());
     const status = await api.getRunStatus(runId);
 
-    expect(status?.state).toBe('running');
+    expect(status?.state).toBe('in_progress');
   });
 });
 
