@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PrismaClient } from '../../../generated/prisma/client';
 import type { Cost, Platform } from '../agent-runner.types';
 import { persistPlan } from '../planner/persist-plan';
 import type { Plan, PlannedTask } from '../planner/planner.types';

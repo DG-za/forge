@@ -1,11 +1,10 @@
 import { getRuns } from '@/app/runs/queries';
-import { prisma } from '@/shared/db';
 import Link from 'next/link';
 import { RunCard } from './run-card.component';
 import { RunListEmpty } from './run-list-empty.component';
 
 export default async function DashboardPage() {
-  const runs = await getRuns(prisma);
+  const runs = await getRuns();
 
   return (
     <section>

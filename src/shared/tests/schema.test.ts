@@ -2,7 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import pg from 'pg';
-import { PrismaClient } from '../../../generated/prisma/client.js';
+import { PrismaClient } from '../../../generated/prisma/client';
 
 let container: StartedPostgreSqlContainer;
 let prisma: PrismaClient;

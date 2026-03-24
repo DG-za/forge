@@ -1,5 +1,5 @@
 import type { EpicContext, EpicIssue, IssueFetcher } from '@/dispatcher/planner/planner.types';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 type GhIssue = {
   number: number;
@@ -9,14 +9,23 @@ type GhIssue = {
   state: string;
 };
 
+const JSON_FIELDS = 'number,title,body,labels,state';
+
 export class GithubIssueFetcher implements IssueFetcher {
   async fetchEpic(repo: string, epicNumber: number): Promise<EpicContext> {
-    const epic = this.ghJson<GhIssue>(
-      `gh issue view ${epicNumber} --repo ${repo} --json number,title,body,labels,state`,
-    );
-    const allIssues = this.ghJson<GhIssue[]>(
-      `gh issue list --repo ${repo} --state all --limit 200 --json number,title,body,labels,state`,
-    );
+    const epic = this.ghJson<GhIssue>(['issue', 'view', String(epicNumber), '--repo', repo, '--json', JSON_FIELDS]);
+    const allIssues = this.ghJson<GhIssue[]>([
+      'issue',
+      'list',
+      '--repo',
+      repo,
+      '--state',
+      'all',
+      '--limit',
+      '200',
+      '--json',
+      JSON_FIELDS,
+    ]);
 
     const mapIssue = (i: GhIssue): EpicIssue => ({
       number: i.number,
@@ -36,8 +45,8 @@ export class GithubIssueFetcher implements IssueFetcher {
     };
   }
 
-  private ghJson<T>(command: string): T {
-    const output = execSync(command, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+  private ghJson<T>(args: string[]): T {
+    const output = execFileSync('gh', args, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
     return JSON.parse(output) as T;
   }
 }

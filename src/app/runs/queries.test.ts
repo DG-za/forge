@@ -1,15 +1,16 @@
 import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
 import { describe, expect, it, vi } from 'vitest';
-import { getRun, getRuns, getRunStatus } from './queries';
 
-function buildMockPrisma(data: { runs?: unknown[]; run?: unknown | null }) {
-  return {
-    run: {
-      findMany: vi.fn().mockResolvedValue(data.runs ?? []),
-      findUnique: vi.fn().mockResolvedValue(data.run ?? null),
-    },
-  };
-}
+const { mockFindMany, mockFindUnique } = vi.hoisted(() => ({
+  mockFindMany: vi.fn(),
+  mockFindUnique: vi.fn(),
+}));
+
+vi.mock('@/shared/db', () => ({
+  prisma: { run: { findMany: mockFindMany, findUnique: mockFindUnique } },
+}));
+
+import { getRun, getRuns, getRunStatus } from './queries';
 
 function buildMockApi(status: RunStatus | null = null): PipelineApi {
   return {
@@ -68,11 +69,11 @@ const sampleRunDetail = {
 
 describe('getRuns', () => {
   it('should return runs ordered by createdAt desc', async () => {
-    const prisma = buildMockPrisma({ runs: [sampleRun] });
+    mockFindMany.mockResolvedValue([sampleRun]);
 
-    const runs = await getRuns(prisma as never);
+    const runs = await getRuns();
 
-    expect(prisma.run.findMany).toHaveBeenCalledWith({
+    expect(mockFindMany).toHaveBeenCalledWith({
       select: { id: true, status: true, repo: true, epicNumber: true, totalCostUsd: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
     });
@@ -80,9 +81,9 @@ describe('getRuns', () => {
   });
 
   it('should return empty array when no runs exist', async () => {
-    const prisma = buildMockPrisma({ runs: [] });
+    mockFindMany.mockResolvedValue([]);
 
-    const runs = await getRuns(prisma as never);
+    const runs = await getRuns();
 
     expect(runs).toEqual([]);
   });
@@ -90,11 +91,11 @@ describe('getRuns', () => {
 
 describe('getRun', () => {
   it('should return run detail with issues, agent logs, and plan tasks', async () => {
-    const prisma = buildMockPrisma({ run: sampleRunDetail });
+    mockFindUnique.mockResolvedValue(sampleRunDetail);
 
-    const run = await getRun('run-1', prisma as never);
+    const run = await getRun('run-1');
 
-    expect(prisma.run.findUnique).toHaveBeenCalledWith({
+    expect(mockFindUnique).toHaveBeenCalledWith({
       where: { id: 'run-1' },
       include: {
         issues: {
@@ -108,9 +109,9 @@ describe('getRun', () => {
   });
 
   it('should return null for missing run', async () => {
-    const prisma = buildMockPrisma({ run: null });
+    mockFindUnique.mockResolvedValue(null);
 
-    const run = await getRun('nonexistent', prisma as never);
+    const run = await getRun('nonexistent');
 
     expect(run).toBeNull();
   });

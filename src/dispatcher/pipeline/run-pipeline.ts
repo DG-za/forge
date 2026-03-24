@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PrismaClient } from '../../../generated/prisma/client';
 import type { Cost } from '../agent-runner.types';
 import { addCost } from '../cost.utils';
 import type { IssueFetcher, Plan, PlannedTask } from '../planner/planner.types';

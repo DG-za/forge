@@ -1,15 +1,15 @@
 import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
-import type { PrismaClient } from '@/shared/db';
+import { prisma } from '@/shared/db';
 import type { RunDetail, RunSummary } from './runs.types';
 
-export async function getRuns(prisma: PrismaClient): Promise<RunSummary[]> {
+export async function getRuns(): Promise<RunSummary[]> {
   return prisma.run.findMany({
     select: { id: true, status: true, repo: true, epicNumber: true, totalCostUsd: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   });
 }
 
-export async function getRun(runId: string, prisma: PrismaClient): Promise<RunDetail | null> {
+export async function getRun(runId: string): Promise<RunDetail | null> {
   return prisma.run.findUnique({
     where: { id: runId },
     include: {

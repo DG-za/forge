@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PrismaClient } from '../../../generated/prisma/client';
 import type { IssueFetcher } from '../planner/planner.types';
 import type { PipelineConfig } from './pipeline.types';
 import { computeResumeState, type ResumeState } from './resume-run';
