@@ -1,4 +1,4 @@
-import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
+import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api.utils';
 import { describe, expect, it, vi } from 'vitest';
 
 const { mockFindMany, mockFindUnique } = vi.hoisted(() => ({
@@ -6,7 +6,7 @@ const { mockFindMany, mockFindUnique } = vi.hoisted(() => ({
   mockFindUnique: vi.fn(),
 }));
 
-vi.mock('@/shared/db', () => ({
+vi.mock('@/shared/db.singleton', () => ({
   prisma: { run: { findMany: mockFindMany, findUnique: mockFindUnique } },
 }));
 

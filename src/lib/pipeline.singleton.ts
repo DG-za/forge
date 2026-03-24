@@ -1,6 +1,6 @@
-import { createPipelineApi, type PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
-import { createStateEmitter, type StateEmitter } from '@/dispatcher/state-emitter';
-import { prisma } from '@/shared/db';
+import { createPipelineApi, type PipelineApi } from '@/dispatcher/pipeline/pipeline-api.utils';
+import { createStateEmitter, type StateEmitter } from '@/dispatcher/state-emitter.utils';
+import { prisma } from '@/shared/db.singleton';
 
 const emitter = createStateEmitter();
 let instance: PipelineApi | null = null;

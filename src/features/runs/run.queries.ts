@@ -1,5 +1,5 @@
-import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
-import { prisma } from '@/shared/db';
+import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api.utils';
+import { prisma } from '@/shared/db.singleton';
 import type { RunDetail, RunSummary } from './run.types';
 
 export async function getRuns(): Promise<RunSummary[]> {

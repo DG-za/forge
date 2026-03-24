@@ -1,4 +1,4 @@
-import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
+import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api.utils';
 import type { ActionResult } from './run.types';
 import type { StartRunInput } from './run.validation';
 import { startRunSchema } from './run.validation';

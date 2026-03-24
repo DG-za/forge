@@ -31,7 +31,7 @@ describe('validateEnv', () => {
   });
 
   it('should throw when DATABASE_URL is not a postgres connection string', () => {
-    const env = { ...validEnv, DATABASE_URL: 'mysql://localhost/db' };
+    const env = { ...validEnv, DATABASE_URL: 'mysql://localhost/db.singleton' };
 
     expect(() => validateEnv(env)).toThrow('DATABASE_URL');
   });

@@ -1,10 +1,10 @@
 import type { Platform } from '@/dispatcher/agent-runner.types';
-import { ClaudeRunner } from '@/dispatcher/claude-runner';
-import { OpenAIRunner } from '@/dispatcher/openai-runner';
-import type { RunInput } from '@/dispatcher/pipeline/pipeline-api';
+import { ClaudeRunner } from '@/dispatcher/claude-runner.utils';
+import { OpenAIRunner } from '@/dispatcher/openai-runner.utils';
+import type { RunInput } from '@/dispatcher/pipeline/pipeline-api.utils';
 import type { RoleConfig } from '@/dispatcher/pipeline/pipeline.types';
 import type { RunInputBuilder } from '../run.actions';
-import { GithubIssueFetcher } from './github-issue-fetcher';
+import { GithubIssueFetcher } from './github-issue-fetcher.utils';
 import { shellExec } from './shell-exec.utils';
 
 function createRunner(platform: Platform) {
