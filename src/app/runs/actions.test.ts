@@ -93,7 +93,7 @@ describe('startRun', () => {
     const result = await startRun(validFormData(), api);
 
     expect(result).toEqual({
-      error: expect.stringContaining('not yet implemented'),
+      error: expect.stringContaining('No RunInputBuilder provided'),
     });
     expect(api.startRun).not.toHaveBeenCalled();
   });

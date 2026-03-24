@@ -5,11 +5,8 @@ import { startRunSchema } from './validation';
 
 export type RunInputBuilder = (input: StartRunInput) => Parameters<PipelineApi['startRun']>[0];
 
-// TODO (#48): Build a real RunInput from validated form data + user config.
-// PipelineConfig requires planner/coder/reviewer roles, gateConfig, cwd, and exec —
-// these need a config UI or stored defaults. For now, this throws at runtime.
 const defaultBuildRunInput: RunInputBuilder = (input) => {
-  throw new Error(`Run input construction not yet implemented for ${input.repo}#${input.epicNumber}`);
+  throw new Error(`No RunInputBuilder provided for ${input.repo}#${input.epicNumber}`);
 };
 
 export async function startRun(

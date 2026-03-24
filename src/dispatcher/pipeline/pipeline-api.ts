@@ -4,7 +4,7 @@ import type { PipelineConfig } from './pipeline.types';
 import { computeResumeState, type ResumeState } from './resume-run';
 import { runPipeline } from './run-pipeline';
 
-type RunInput = {
+export type RunInput = {
   config: PipelineConfig;
   issueFetcher: IssueFetcher;
   getDiff: () => Promise<string>;
