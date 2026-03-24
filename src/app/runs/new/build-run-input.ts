@@ -1,10 +1,8 @@
 import type { Platform } from '@/dispatcher/agent-runner.types';
 import { ClaudeRunner } from '@/dispatcher/claude-runner';
-import type { CommandExecutor } from '@/dispatcher/coder/coder.types';
 import { OpenAIRunner } from '@/dispatcher/openai-runner';
 import type { RunInput } from '@/dispatcher/pipeline/pipeline-api';
 import type { RoleConfig } from '@/dispatcher/pipeline/pipeline.types';
-import type { IssueFetcher } from '@/dispatcher/planner/planner.types';
 import type { RunInputBuilder } from '../actions';
 import { GithubIssueFetcher } from './github-issue-fetcher';
 import { shellExec } from './shell-exec';
@@ -34,9 +32,9 @@ export const buildRunInput: RunInputBuilder = (input): RunInput => {
         testCommand: 'npm test',
       },
       cwd,
-      exec: shellExec as CommandExecutor,
+      exec: shellExec,
     },
-    issueFetcher: new GithubIssueFetcher() as IssueFetcher,
+    issueFetcher: new GithubIssueFetcher(),
     getDiff: () => getDiff(cwd),
   };
 };

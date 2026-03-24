@@ -1,4 +1,6 @@
-export type Platform = 'claude' | 'openai';
+import type { Platform } from '@/dispatcher/agent-runner.types';
+
+export type { Platform };
 
 export type ModelOption = {
   value: string;

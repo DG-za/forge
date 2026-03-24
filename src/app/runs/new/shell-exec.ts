@@ -1,10 +1,12 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 
 export function shellExec(command: string, cwd: string): Promise<{ exitCode: number; output: string }> {
+  const [cmd, ...args] = command.split(' ');
+
   return new Promise((resolve) => {
-    exec(command, { cwd, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+    execFile(cmd, args, { cwd, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
       resolve({
-        exitCode: error?.code ?? 0,
+        exitCode: typeof error?.code === 'number' ? error.code : error ? 1 : 0,
         output: stdout + stderr,
       });
     });
