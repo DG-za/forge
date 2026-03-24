@@ -1,5 +1,5 @@
-import type { PipelineApi } from '@/dispatcher/pipeline/pipeline-api';
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { PipelineApi, RunStatus } from '@/dispatcher/pipeline/pipeline-api';
+import type { PrismaClient } from '@/shared/db';
 import type { RunDetail, RunSummary } from './runs.types';
 
 export async function getRuns(prisma: PrismaClient): Promise<RunSummary[]> {
@@ -22,6 +22,6 @@ export async function getRun(runId: string, prisma: PrismaClient): Promise<RunDe
   });
 }
 
-export async function getRunStatus(runId: string, api: PipelineApi) {
+export async function getRunStatus(runId: string, api: PipelineApi): Promise<RunStatus | null> {
   return api.getRunStatus(runId);
 }
