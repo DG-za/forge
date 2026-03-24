@@ -1,8 +1,32 @@
-export default function DashboardPage() {
+import { getRuns } from '@/app/runs/queries';
+import { prisma } from '@/shared/db';
+import Link from 'next/link';
+import { RunCard } from './run-card.component';
+import { RunListEmpty } from './run-list-empty.component';
+
+export default async function DashboardPage() {
+  const runs = await getRuns(prisma);
+
   return (
     <section>
-      <h1 className="text-text text-2xl font-bold">Dashboard</h1>
-      <p className="text-text-muted mt-2">Active runs and recent activity will appear here.</p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-text text-2xl font-bold">Dashboard</h1>
+        <Link
+          href="/runs/new"
+          className="bg-accent hover:bg-accent-hover rounded-md px-4 py-2 text-sm font-medium text-white transition-colors"
+        >
+          New Run
+        </Link>
+      </div>
+      {runs.length === 0 ? (
+        <RunListEmpty />
+      ) : (
+        <div className="mt-4 space-y-3">
+          {runs.map((run) => (
+            <RunCard key={run.id} run={run} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
