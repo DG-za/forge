@@ -30,45 +30,40 @@ Before switching to a new issue, verify the working tree is clean:
    If there are unpushed commits, ask: "You have unpushed commits on this branch. Want me to push before switching?"
 
 3. **Unmerged branch?**
-   Check if the current branch has an open PR or unmerged changes:
    ```bash
    gh pr view --json state,url 2>/dev/null
    ```
-   - If a PR exists and is open → tell the user: "PR <url> is still open. Want to merge it first, or switch anyway?"
-   - If no PR exists and we're not on the default branch and there are commits ahead of the default branch → ask: "This branch has unmerged work. Want me to create a PR, or switch anyway?"
+   - If a PR exists and is open → "PR <url> is still open. Want to merge it first, or switch anyway?"
+   - If no PR exists and there are commits ahead of the default branch → "This branch has unmerged work. Want me to create a PR, or switch anyway?"
 
-Wait for the user's decision before proceeding. Don't force anything.
+Wait for the user's decision before proceeding.
 
 ## Step 2 — Parse and Load
 
 1. Parse the issue number from arguments.
-2. If no number given, list open issues and let the user pick:
+2. If no number given, list open issues:
    ```bash
    gh issue list --state open --json number,title,labels --limit 15
    ```
-   If there are no obvious open issues to work on, check `docs/roadmap.md` — if the current phase is complete or there are no open issues for it, suggest starting the next phase: "No open issues. The roadmap shows Phase X is next. Want me to run `/roadmap` to create issues for it?"
-3. Fetch full issue details: `gh issue view <number> --json title,body,labels,state`
-4. Read `CONTEXT.md` to determine **work mode** (look for `Work Mode: autonomous` or `Work Mode: manual`). Default to **manual** if not specified.
-5. A `--manual` or `--autonomous` flag in the arguments overrides the project setting for this session.
+   If no open issues, check `docs/roadmap.md` — suggest starting the next roadmap phase if applicable.
+3. Fetch full issue details including comments: `gh issue view <number> --json title,body,labels,comments,state`
+4. Read `CONTEXT.md` for **work mode**. Default to **manual** if not specified.
+5. Read `WORKFLOW.md` if it exists — this contains the mode-specific rules, question intensity, and TDD setting for this project.
+6. `--manual` or `--autonomous` flag overrides the project setting for this session.
 
 ## Step 3 — Branch Setup
 
-1. Check if a branch already exists for this issue:
+1. Check if a branch already exists:
    ```bash
    git branch --list "*<number>*"
    ```
-2. If a branch exists, switch to it.
-3. If not, create a new branch from the default branch:
-   - Check issue labels for `bug` → use `bug/<number>-<slug>`
-   - Otherwise → use `feature/<number>-<slug>`
+2. If it exists, switch to it.
+3. If not, create from the default branch:
+   - `bug` label → `bug/<number>-<slug>`
+   - Otherwise → `feature/<number>-<slug>`
    - Slug: lowercase, hyphenated, max 5 words from the issue title.
-   ```bash
-   git checkout -b feature/<number>-<slug>
-   ```
 
 ## Step 4 — Show Context
-
-Set the terminal tab title and display a brief summary:
 
 ```bash
 echo -ne "\033]0;#<number> — <title>\007"
@@ -76,7 +71,7 @@ echo -ne "\033]0;#<number> — <title>\007"
 
 ```
 🎯 Working on #<number>: <title>
-📋 Mode: <autonomous|manual>
+📋 Mode: <autonomous|manual|guided>
 🌿 Branch: <branch-name>
 
 <2-3 sentence summary of what needs doing>
@@ -84,27 +79,45 @@ echo -ne "\033]0;#<number> — <title>\007"
 
 ## Step 5 — Plan or Implement
 
+Run the `plan-implementation` skill, which handles questions, the brief, and the agent plan.
+
 ### Manual Mode
 
-1. Run the `plan-implementation` skill for this issue.
-2. Present the plan and **stop**. Do not write any code.
-3. Wait for the user to review and approve the plan.
-4. Only after explicit approval ("looks good", "go ahead", "approved", etc.), begin implementation.
+1. Run `plan-implementation`.
+2. Present the brief and **stop**. Do not write any code.
+3. Wait for explicit approval before beginning implementation.
 
 ### Autonomous Mode
 
-1. Run the `plan-implementation` skill for this issue.
-2. Present the plan briefly (3–5 bullet summary).
-3. Immediately begin implementation.
-4. Commit after each step.
-5. When done, run a quick self-review (review current branch diff vs default branch).
-6. Create a PR if the work is complete.
-7. **Do not merge the PR** — always leave that for the user.
+1. Run `plan-implementation`.
+2. Present the brief. Begin implementation immediately after.
+3. Commit after each step.
+4. When done, run `/code-review` (quick mode) as a self-check.
+5. Create a PR. **Do not merge it.**
+
+### Guided Mode
+
+Same as autonomous, but at the end of an epic (when all issues in the current roadmap phase are complete), **stop and run the epic review** before starting the next phase:
+
+1. Run `/code-review deep` across the epic's changes.
+2. Present a summary: what was built, what was deferred, any architectural concerns.
+3. Propose the next epic from `docs/roadmap.md`.
+4. **Wait for the user to approve** before starting the next epic.
+
+## Scope Discipline During Implementation ⚠️
+
+Any time a decision is made that deviates from the original issue scope — something deferred, added, or changed — post a comment on the GitHub issue immediately:
+
+```bash
+gh issue comment <number> --body "Scope decision: [what changed and why]. Follow-up tracked: [issue link or 'none needed']."
+```
+
+This keeps the review agent informed and prevents it flagging intentional deferrals as missing work.
 
 ## Rules
 
 - **Never close the issue** — only the user can do that.
 - **Never merge a PR** — only the user can do that.
-- One issue at a time. If the user calls `/work <other-number>`, run Step 1 checks first.
+- One issue at a time. Run Step 1 checks before switching.
 - Update `CONTEXT.md` if any decisions are made during implementation.
 - Record new architecture decisions in `docs/decisions/` if applicable.

@@ -1,11 +1,18 @@
 import type { CoderTask, CommandExecutor } from '../coder/coder.types';
 
-export async function createPullRequest(
-  worktreePath: string,
-  branch: string,
-  task: CoderTask,
-  exec: CommandExecutor,
-): Promise<string | null> {
+export type CreatePullRequestOptions = {
+  worktreePath: string;
+  branch: string;
+  task: CoderTask;
+  exec: CommandExecutor;
+};
+
+export async function createPullRequest({
+  worktreePath,
+  branch,
+  task,
+  exec,
+}: CreatePullRequestOptions): Promise<string | null> {
   const pushResult = await exec(`git push -u origin ${branch}`, worktreePath);
   if (pushResult.exitCode !== 0) return null;
 

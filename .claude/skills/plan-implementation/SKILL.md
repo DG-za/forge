@@ -1,84 +1,164 @@
 ---
 name: plan-implementation
-description: Create a detailed implementation plan for a GitHub issue and save it as an artifact
+description: Ask clarifying questions, then create a human-readable implementation brief and an agent-ready plan for a GitHub issue
 user_invocable: true
 argument-hint: [issue-number]
 ---
 
 # Plan Implementation
 
-Create a detailed implementation plan for a GitHub issue before writing any code.
+Prepare to implement a GitHub issue by first asking clarifying questions, then producing a brief that's useful to the human and a plan that's useful for implementation.
 
 ## Input
 
 $ARGUMENTS
 
-## Issue Loading
+## Step 1 — Load the Issue
 
 1. If the user provides an issue number, use it.
-2. Otherwise, infer from the current git branch name — parse the issue number from `feature/<number>-...` or `bug/<number>-...`.
-3. Fetch the issue: `gh issue view <number>`
+2. Otherwise, infer from the current git branch name — parse from `feature/<number>-...` or `bug/<number>-...`.
+3. Fetch the issue including comments: `gh issue view <number> --json title,body,comments,labels`
+4. Read `CONTEXT.md` and `docs/decisions/` for relevant decisions.
+5. Read `WORKFLOW.md` if it exists — this sets the question intensity and mode-specific behaviour for this project.
+6. Inspect the codebase — find relevant modules, routes, components, data models, and config.
 
-## Process
+## Step 2 — Discovery Questions
 
-1. **Summarise the issue** in 3–6 bullets: objective, constraints, non-goals, acceptance criteria.
-2. **Inspect the codebase** — find relevant modules, routes, components, data models, types, and config.
-3. **Identify gaps** — what already exists vs. what is missing. Be explicit.
-4. **Read `docs/decisions/`** for any architecture decisions that affect this work.
-5. **Propose a step-by-step plan** — each step should be independently implementable and committable.
+Before planning, have a structured Q&A conversation. This is the most valuable part of the process — not a gate to get through.
 
-## Plan Requirements
+**Question intensity** — check `WORKFLOW.md` for the mode-specific guidance. As a reference:
+- **Manual:** 3–6 questions per issue
+- **Guided:** 0–3 questions (epic kickoff reduces this significantly)
+- **Autonomous:** 1–2 questions max
 
-Every plan must address:
+**Start with this prompt:**
+```
+💬 Tip: these questions work great with voice-to-speech if you have it set up — faster and more conversational than typing.
 
-- **What to build** — files to create or modify, with specific paths.
-- **Tests to add** — unit tests for logic, integration tests for data access, E2E tests for user-facing workflows (if applicable to the project's stack).
-- **Docs to update** — README, CONTEXT.md, decision docs if a new architectural pattern is introduced.
+Before I start on #<number>, I have a few questions:
 
-## Output
+1. **<Question>**
+   → <Options or suggested answer where genuinely useful — omit if open-ended is better>
 
-Save the plan to `docs/planning/<issue-number>/<issue-number>-implementation.md`. Create directories if needed.
+2. **<Question>**
+   ...
+```
 
-Format:
+### Question design rules
+
+- **Number every question** — the structure signals that this step matters and has a shape.
+- **Ask what you don't already know** — don't re-present things already clear from the issue. If success criteria is already well-defined, don't ask about it.
+- **Mix open-ended and options** — use open-ended questions where the answer could genuinely surprise you. Present options where there are multiple worthwhile paths the user should consciously choose between. The goal is *decision-maker*, not *brainstormer*.
+- **Options anchor — use them intentionally** — listing options helps the user consider paths they might not have thought of. But for preference or intent questions, leave it open so the answer isn't anchored to your framing.
+- **Follow-up rounds are fine** — after the first answers come in, ask 1–2 follow-up questions if an answer opens a new question. End when there's genuine clarity, not when you've hit a quota.
+- **Leave a stray thought if useful** — if something doesn't fit neatly as a question but is worth flagging, add it as a final note: *"One more thing worth considering: ..."*
+
+### Recording answers
+
+Post all Q&A as a comment on the GitHub issue before proceeding — this is the record the review agent will read:
+
+```bash
+gh issue comment <number> --body "## Planning Q&A
+
+**Q: <question>**
+A: <answer>
+
+**Q: <question>**
+A: <answer>"
+```
+
+## Step 3 — Produce the Implementation Brief
+
+The brief is for the **human**. It tells them what's happening at a level they can scan in 60 seconds. Not file names. Not step sequences. The things they'd actually want to weigh in on.
+
+Save to `docs/planning/<issue-number>/<issue-number>-brief.md`:
+
+```markdown
+# Brief: <issue title>
+
+## What we're building
+
+<2–4 sentences. What the user will be able to do when this is done. Plain language.>
+
+## Features in scope
+
+- <Feature 1 — one line>
+- <Feature 2 — one line>
+- ...
+
+## Out of scope (for this issue)
+
+- <Anything explicitly excluded — helps set expectations>
+
+## Architectural decisions to make
+
+<!-- Only list genuine decision points — things where a reasonable person could go either way -->
+<!-- Include a suggested direction for each -->
+
+| Decision | Options | Suggested |
+|---|---|---|
+| <e.g. Where does validation live?> | <Option A / Option B> | <Suggested + one-line reason> |
+
+If there are no real decisions to make, omit this section.
+
+## Uncertain or risky areas
+
+- <Anything that might be harder than expected, have unknown behaviour, or need investigation>
+
+If nothing is uncertain, omit this section.
+```
+
+Present the brief to the user and ask: "Anything you'd like to change before I start?"
+
+## Step 4 — Produce the Agent Plan (internal)
+
+This is for the agent's use during implementation — not presented to the user unless they ask. Save to `docs/planning/<issue-number>/<issue-number>-implementation.md`.
 
 ```markdown
 ## Issue Summary
+<bullets>
 
-- Bullets
+## Current State
+<relevant files, existing behaviour, gaps>
 
-## Current State Analysis
+## Steps
 
-- Relevant files/modules
-- Existing behaviour
-- Gaps / missing pieces
+### Step 1: <title>
+- Files to create/modify, with paths
+- What changes and why
+- Tests to add
 
-## Plan of Action
-
-### Step 1: <short title>
-
-- File locations, what to add/change, and why
-- Tests to add or update
-- Config or docs changes if needed
-
-### Step 2: <short title>
-
+### Step 2: <title>
 ...
 
-## Risks / Open Questions
-
-- Bullets (if any)
+## Assumptions
+<anything inferred that wasn't confirmed>
 ```
 
-## Next Step
+## Step 5 — Proceed Based on Work Mode
 
-After saving the plan, enter Claude Code's built-in plan mode (`/plan`) and present the plan to the user for interactive review.
+Check `CONTEXT.md` for `Work Mode`.
 
-**Do not begin implementation until the user approves the plan** (unless the project is in autonomous work mode — check CONTEXT.md for `Work Mode`).
+### Manual mode
+Present the brief. Stop. Wait for explicit approval before writing any code.
+
+### Autonomous or Guided mode
+Present the brief. Wait briefly (10–15 seconds or one user message) for any objections. Then begin implementation immediately.
+
+## During Implementation — Scope Discipline
+
+When implementing, if any decision is made that **deviates from the original issue scope** — something deferred, something added, something changed — post a comment on the GitHub issue immediately:
+
+```bash
+gh issue comment <number> --body "Scope decision: <what changed and why>. Follow-up: <issue link or 'none needed'>."
+```
+
+This keeps the review agent informed and prevents it from flagging intentional deferrals as missing work.
 
 ## Guidelines
 
-- Prefer concrete file paths and function names over vague descriptions.
-- Keep steps small and ordered — each step = one commit.
-- Do not implement code in this skill — only plan.
-- If information is missing, list assumptions and flag questions.
-- During implementation (after approval), commit after every step.
+- Questions should surface real ambiguity — not generate process overhead.
+- The brief is a communication tool, not a specification. Keep it short.
+- The agent plan is thorough — the user doesn't need to read it.
+- Commit after every meaningful step during implementation.
+- Update `CONTEXT.md` if new patterns or decisions emerge.

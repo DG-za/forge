@@ -38,7 +38,7 @@ describe('persistRunTransition', () => {
   it('should persist a valid run transition to the database', async () => {
     const run = await createRun(prisma);
 
-    const transition = await persistRunTransition(prisma, run.id, 'planning');
+    const transition = await persistRunTransition({ prisma, runId: run.id, to: 'planning' });
 
     expect(transition.from).toBe('pending');
     expect(transition.to).toBe('planning');
@@ -50,7 +50,7 @@ describe('persistRunTransition', () => {
   it('should reject an invalid run transition and leave DB unchanged', async () => {
     const run = await createRun(prisma);
 
-    await expect(persistRunTransition(prisma, run.id, 'completed')).rejects.toThrow(InvalidTransitionError);
+    await expect(persistRunTransition({ prisma, runId: run.id, to: 'completed' })).rejects.toThrow(InvalidTransitionError);
 
     const unchanged = await prisma.run.findUniqueOrThrow({ where: { id: run.id } });
     expect(unchanged.status).toBe('pending');
@@ -60,7 +60,7 @@ describe('persistRunTransition', () => {
     const run = await createRun(prisma);
     const listener: StateChangeListener = vi.fn();
 
-    await persistRunTransition(prisma, run.id, 'planning', listener);
+    await persistRunTransition({ prisma, runId: run.id, to: 'planning', onStateChange: listener });
 
     expect(listener).toHaveBeenCalledWith({
       kind: 'run',
@@ -71,7 +71,7 @@ describe('persistRunTransition', () => {
   it('should support resume — transition from mid-lifecycle state', async () => {
     const run = await createRun(prisma, { status: 'planning' });
 
-    const transition = await persistRunTransition(prisma, run.id, 'in_progress');
+    const transition = await persistRunTransition({ prisma, runId: run.id, to: 'in_progress' });
 
     expect(transition.from).toBe('planning');
     expect(transition.to).toBe('in_progress');
@@ -83,7 +83,7 @@ describe('persistIssueTransition', () => {
     const run = await createRun(prisma);
     const issue = await createIssue(prisma, run.id);
 
-    const transition = await persistIssueTransition(prisma, issue.id, 'coding');
+    const transition = await persistIssueTransition({ prisma, issueId: issue.id, to: 'coding' });
 
     expect(transition.from).toBe('queued');
     expect(transition.to).toBe('coding');
@@ -96,7 +96,7 @@ describe('persistIssueTransition', () => {
     const run = await createRun(prisma);
     const issue = await createIssue(prisma, run.id);
 
-    await expect(persistIssueTransition(prisma, issue.id, 'done')).rejects.toThrow(InvalidTransitionError);
+    await expect(persistIssueTransition({ prisma, issueId: issue.id, to: 'done' })).rejects.toThrow(InvalidTransitionError);
 
     const unchanged = await prisma.issue.findUniqueOrThrow({ where: { id: issue.id } });
     expect(unchanged.status).toBe('queued');
@@ -107,7 +107,7 @@ describe('persistIssueTransition', () => {
     const issue = await createIssue(prisma, run.id);
     const listener: StateChangeListener = vi.fn();
 
-    await persistIssueTransition(prisma, issue.id, 'coding', listener);
+    await persistIssueTransition({ prisma, issueId: issue.id, to: 'coding', onStateChange: listener });
 
     expect(listener).toHaveBeenCalledWith({
       kind: 'issue',

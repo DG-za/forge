@@ -17,13 +17,14 @@ Read `docs/roadmap.md` if it exists. If not, this is a fresh generation.
 Read these to understand the project's current state and direction:
 
 1. `CONTEXT.md` — project description, stack, work mode, decisions
-2. `README.md` — what the project is and what exists
-3. `docs/architecture.md` — if it exists, current structure
-4. Open GitHub issues and epics:
+2. `WORKFLOW.md` — work mode rules and question intensity (if it exists)
+3. `README.md` — what the project is and what exists
+4. `docs/architecture.md` — if it exists, current structure
+5. Open GitHub issues and epics:
    ```bash
    gh issue list --state open --json number,title,labels,body --limit 50
    ```
-5. Closed issues (for understanding what's been done):
+6. Closed issues (for understanding what's been done):
    ```bash
    gh issue list --state closed --json number,title,labels --limit 30
    ```
@@ -61,14 +62,37 @@ Read these to understand the project's current state and direction:
 When the user says to start the next phase:
 
 1. Read the phase description from the roadmap.
-2. Read `CONTEXT.md` for work mode (autonomous/manual).
-3. **Create sub-issues** under the phase's epic:
-   - Break the phase into concrete, one-day issues
-   - Each issue gets acceptance criteria and labels
-   - Link them as sub-issues of the epic via GraphQL API
+2. Read `CONTEXT.md` and `WORKFLOW.md` for work mode and question intensity.
 
-4. **Autonomous mode:** Create the issues, present a brief summary.
-5. **Manual mode:** Propose the issues, wait for approval before creating.
+### Epic Kickoff Brief
+
+Before creating any issues, present a brief covering the epic's scope:
+
+```
+## Epic Kickoff: <phase name>
+
+**What we're building:** <2–3 sentences>
+**Key decisions to make:** <list any genuine decision points>
+**Risks / unknowns:** <anything that might surprise us>
+**Out of scope (this epic):** <what we're explicitly not doing>
+```
+
+Then ask the mode-appropriate questions:
+- **Manual:** 4–6 questions about scope, risks, acceptance criteria per issue
+- **Guided:** 3–5 questions about what success looks like, known risks, decisions to make before work starts
+- **Autonomous:** 2–3 light questions to confirm scope direction for the batch
+
+Wait for answers before creating issues.
+
+### Create Sub-Issues
+
+3. Break the phase into concrete, one-day issues
+4. Each issue gets acceptance criteria and labels
+5. Link them as sub-issues of the epic via GraphQL API
+
+**Autonomous mode:** Create the issues as a batch after light confirmation. Present a brief summary.
+**Guided mode:** Propose the issues as a batch. Create after review.
+**Manual mode:** Propose each issue individually. Create only after explicit approval per issue.
 
 6. Update `docs/roadmap.md` to show the phase as "in progress".
 
