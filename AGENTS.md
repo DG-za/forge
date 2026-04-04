@@ -27,6 +27,7 @@ src/
   dispatcher/        # Task runner — dispatches agents to work through epics
   lib/               # Shared utilities and singletons
   shared/            # Shared types and config
+agents/              # Rule fragments imported by CLAUDE.md
 docs/
   decisions/         # Architecture decision records
 ```
