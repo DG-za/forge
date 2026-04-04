@@ -181,6 +181,8 @@ Before proposing a change that contradicts a recorded decision, **read the decis
 
 High-value rules distilled from Clean Code principles. These complement the general rules — no duplication. Every rule here should be consistently enforced.
 
+**Before marking any issue done, run `scripts/agent-precommit.sh`.** It runs lint, type-check, and tests, then prints a checklist for rules that can't be automated. Rules 1, 8, 18, 20, 35, and 37 below are enforced by ESLint — the rest must be checked manually.
+
 ### Function Design
 
 1. **3 parameters max.** Beyond that, use an options object. Too many parameters means the function is doing too much or its interface is unclear.

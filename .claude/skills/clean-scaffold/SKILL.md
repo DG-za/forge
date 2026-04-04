@@ -41,6 +41,8 @@ Compare:
 
 Check if these exist:
 - `PROJECT.md`
+- `WORKFLOW.md` — should match one of the workflow templates (`workflows/workflow-manual.md`, `workflow-guided.md`, or `workflow-autonomous.md`). Determine the correct variant from `CONTEXT.md` (look for `Work Mode`).
+- `REVIEW.md` — from `files/REVIEW.md`
 - `.github/ISSUE_TEMPLATE/work-item.yml`
 - `.github/pull_request_template.md`
 - `docs/decisions/README.md`
@@ -53,7 +55,7 @@ Present a summary of what would change:
 🔄 Scaffold update for <project-name>
 
 Skills:
-  ✅ Up to date: /review-pr, /plan-implementation, /view
+  ✅ Up to date: /code-review, /plan-implementation, /view
   🔄 Outdated:   /work (Step 1 checks added), /clean-code (new rules)
   ➕ Missing:    /clean-scaffold
 

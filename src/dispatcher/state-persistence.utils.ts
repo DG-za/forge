@@ -3,12 +3,19 @@ import { transitionIssue } from './issue-state-machine.utils';
 import { transitionRun } from './run-state-machine.utils';
 import type { IssueState, IssueTransition, RunState, RunTransition, StateChangeListener } from './state-machine.types';
 
-export async function persistRunTransition(
-  prisma: PrismaClient,
-  runId: string,
-  to: RunState,
-  onStateChange?: StateChangeListener,
-): Promise<RunTransition> {
+export type PersistRunTransitionOptions = {
+  prisma: PrismaClient;
+  runId: string;
+  to: RunState;
+  onStateChange?: StateChangeListener;
+};
+
+export async function persistRunTransition({
+  prisma,
+  runId,
+  to,
+  onStateChange,
+}: PersistRunTransitionOptions): Promise<RunTransition> {
   const run = await prisma.run.findUniqueOrThrow({ where: { id: runId } });
   const from = run.status as RunState;
 
@@ -21,12 +28,19 @@ export async function persistRunTransition(
   return transition;
 }
 
-export async function persistIssueTransition(
-  prisma: PrismaClient,
-  issueId: string,
-  to: IssueState,
-  onStateChange?: StateChangeListener,
-): Promise<IssueTransition> {
+export type PersistIssueTransitionOptions = {
+  prisma: PrismaClient;
+  issueId: string;
+  to: IssueState;
+  onStateChange?: StateChangeListener;
+};
+
+export async function persistIssueTransition({
+  prisma,
+  issueId,
+  to,
+  onStateChange,
+}: PersistIssueTransitionOptions): Promise<IssueTransition> {
   const issue = await prisma.issue.findUniqueOrThrow({ where: { id: issueId } });
   const from = issue.status as IssueState;
 

@@ -32,7 +32,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 0, output: 'https://github.com/owner/repo/pull/1' },
     });
 
-    await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     const pushCall = calls.find((c) => c.command.includes('git push'));
     const prCall = calls.find((c) => c.command.includes('gh pr create'));
@@ -46,7 +46,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 0, output: 'https://github.com/owner/repo/pull/1' },
     });
 
-    await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     const pushCall = calls.find((c) => c.command.includes('git push'));
     expect(pushCall?.command).toContain('-u origin feature/42-add-auth');
@@ -57,7 +57,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 0, output: 'https://github.com/owner/repo/pull/1\n' },
     });
 
-    const result = await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    const result = await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     expect(result).toBe('https://github.com/owner/repo/pull/1');
   });
@@ -67,7 +67,7 @@ describe('createPullRequest', () => {
       'git push': { exitCode: 1, output: 'fatal: remote rejected' },
     });
 
-    const result = await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    const result = await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     expect(result).toBeNull();
   });
@@ -77,7 +77,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 1, output: 'error creating PR' },
     });
 
-    const result = await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    const result = await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     expect(result).toBeNull();
   });
@@ -87,7 +87,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 0, output: 'https://github.com/owner/repo/pull/1' },
     });
 
-    await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     const prCall = calls.find((c) => c.command.includes('gh pr create'));
     expect(prCall?.command).toContain('#42');
@@ -98,7 +98,7 @@ describe('createPullRequest', () => {
       'gh pr create': { exitCode: 0, output: 'https://github.com/owner/repo/pull/1' },
     });
 
-    await createPullRequest('/worktree.utils', 'feature/42-add-auth', task, exec);
+    await createPullRequest({ worktreePath: '/worktree.utils', branch: 'feature/42-add-auth', task, exec });
 
     for (const call of calls) {
       expect(call.cwd).toBe('/worktree.utils');

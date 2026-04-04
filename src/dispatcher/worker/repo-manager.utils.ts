@@ -8,7 +8,7 @@ export async function ensureRepo(repo: string, basePath: string, exec: CommandEx
 
   if (exists.exitCode === 0) return pullLatest(repo, repoDir, exec);
 
-  return cloneRepo(repo, basePath, repoDir, exec);
+  return cloneRepo({ repo, basePath, repoDir, exec });
 }
 
 async function pullLatest(repo: string, repoDir: string, exec: CommandExecutor): Promise<RepoResult> {
@@ -20,7 +20,9 @@ async function pullLatest(repo: string, repoDir: string, exec: CommandExecutor):
   return { ok: true, repoDir };
 }
 
-async function cloneRepo(repo: string, basePath: string, repoDir: string, exec: CommandExecutor): Promise<RepoResult> {
+type CloneRepoOptions = { repo: string; basePath: string; repoDir: string; exec: CommandExecutor };
+
+async function cloneRepo({ repo, basePath, repoDir, exec }: CloneRepoOptions): Promise<RepoResult> {
   const ownerDir = `${basePath}/${repo.split('/')[0]}`;
   await exec(`mkdir -p ${ownerDir}`, '.');
 

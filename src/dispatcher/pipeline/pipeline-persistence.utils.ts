@@ -33,7 +33,7 @@ export function createPipelinePersistence(
 ): PipelinePersistence {
   return {
     async transitionRun(to) {
-      await persistRunTransition(prisma, runId, to, onStateChange);
+      await persistRunTransition({ prisma, runId, to, onStateChange });
     },
 
     async savePlan(plan) {

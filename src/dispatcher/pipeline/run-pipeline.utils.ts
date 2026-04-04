@@ -46,7 +46,7 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     plan = resumeState.initialPlan;
     remainingTasks = [...resumeState.remainingTasks];
   } else {
-    await transitionRun(db, emit, runId, 'pending', 'planning');
+    await transitionRun({ db, emit, runId, from: 'pending', to: 'planning' });
 
     try {
       const plannerStart = Date.now();
@@ -62,11 +62,11 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
       plan = planResult.plan;
       await db?.savePlan(plan);
     } catch {
-      await transitionRun(db, emit, runId, 'planning', 'failed');
+      await transitionRun({ db, emit, runId, from: 'planning', to: 'failed' });
       return { runId, totalCost, outcomes, plan: { tasks: [], summary: '' }, ...counters(outcomes) };
     }
 
-    await transitionRun(db, emit, runId, 'planning', 'in_progress');
+    await transitionRun({ db, emit, runId, from: 'planning', to: 'in_progress' });
     remainingTasks = [...plan.tasks];
   }
 
@@ -140,10 +140,10 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
     }
 
     await db?.updateTotalCost(totalCost);
-    budgetWarningEmitted = checkBudgetWarning(emit, runId, totalCost, config.maxBudgetUsd, budgetWarningEmitted);
+    budgetWarningEmitted = checkBudgetWarning({ emit, runId, totalCost, maxBudgetUsd: config.maxBudgetUsd, alreadyEmitted: budgetWarningEmitted });
 
     if (remainingTasks.length > 0) {
-      const replanResult = await tryReplan(config, epicContext, plan, outcomes);
+      const replanResult = await tryReplan({ config, epicContext, originalPlan: plan, outcomes });
       if (replanResult) {
         totalCost = addCost(totalCost, replanResult.cost);
         remainingTasks = replanResult.tasks;
@@ -153,7 +153,7 @@ export async function runPipeline(options: RunPipelineOptions): Promise<FullPipe
   }
 
   const finalState = outcomes.some((o) => o.status === 'done') ? 'completed' : 'failed';
-  await transitionRun(db, emit, runId, 'in_progress', finalState);
+  await transitionRun({ db, emit, runId, from: 'in_progress', to: finalState });
 
   return { runId, totalCost, outcomes, plan, ...counters(outcomes) };
 }
@@ -166,13 +166,15 @@ function counters(outcomes: IssueOutcome[]) {
   };
 }
 
-function checkBudgetWarning(
-  emit: (event: StateChangeEvent) => void,
-  runId: string,
-  totalCost: Cost,
-  maxBudgetUsd: number,
-  alreadyEmitted: boolean,
-): boolean {
+type CheckBudgetWarningOptions = {
+  emit: (event: StateChangeEvent) => void;
+  runId: string;
+  totalCost: Cost;
+  maxBudgetUsd: number;
+  alreadyEmitted: boolean;
+};
+
+function checkBudgetWarning({ emit, runId, totalCost, maxBudgetUsd, alreadyEmitted }: CheckBudgetWarningOptions): boolean {
   if (alreadyEmitted) return true;
   const percentUsed = totalCost.costUsd / maxBudgetUsd;
   if (percentUsed >= BUDGET_WARNING_THRESHOLD) {
@@ -185,13 +187,15 @@ function checkBudgetWarning(
   return false;
 }
 
-async function transitionRun(
-  db: PipelinePersistence | null,
-  emit: (event: StateChangeEvent) => void,
-  runId: string,
-  from: RunState,
-  to: RunState,
-): Promise<void> {
+type TransitionRunOptions = {
+  db: PipelinePersistence | null;
+  emit: (event: StateChangeEvent) => void;
+  runId: string;
+  from: RunState;
+  to: RunState;
+};
+
+async function transitionRun({ db, emit, runId, from, to }: TransitionRunOptions): Promise<void> {
   if (db) {
     await db.transitionRun(to);
   } else {

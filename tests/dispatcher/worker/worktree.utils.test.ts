@@ -66,12 +66,12 @@ describe('cleanupWorktree', () => {
   it('should remove worktree and delete branch', async () => {
     const { exec, calls } = createMockExec();
 
-    await cleanupWorktree(
-      '/repos/owner/repo',
-      '/repos/owner/repo/.worktrees/feature/42-add-auth',
-      'feature/42-add-auth',
+    await cleanupWorktree({
+      repoDir: '/repos/owner/repo',
+      worktreePath: '/repos/owner/repo/.worktrees/feature/42-add-auth',
+      branch: 'feature/42-add-auth',
       exec,
-    );
+    });
 
     const removeCall = calls.find((c) => c.command.includes('git worktree remove'));
     expect(removeCall).toBeDefined();
@@ -82,7 +82,7 @@ describe('cleanupWorktree', () => {
   it('should prune worktrees after removal', async () => {
     const { exec, calls } = createMockExec();
 
-    await cleanupWorktree('/repos/owner/repo', '/tmp/wt', 'feature/42', exec);
+    await cleanupWorktree({ repoDir: '/repos/owner/repo', worktreePath: '/tmp/wt', branch: 'feature/42', exec });
 
     const pruneCall = calls.find((c) => c.command.includes('git worktree prune'));
     expect(pruneCall).toBeDefined();

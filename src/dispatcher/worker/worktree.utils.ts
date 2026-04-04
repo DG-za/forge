@@ -19,12 +19,19 @@ export async function createWorktree(repoDir: string, branch: string, exec: Comm
   return { ok: true, worktreePath };
 }
 
-export async function cleanupWorktree(
-  repoDir: string,
-  worktreePath: string,
-  branch: string,
-  exec: CommandExecutor,
-): Promise<void> {
+export type CleanupWorktreeOptions = {
+  repoDir: string;
+  worktreePath: string;
+  branch: string;
+  exec: CommandExecutor;
+};
+
+export async function cleanupWorktree({
+  repoDir,
+  worktreePath,
+  branch,
+  exec,
+}: CleanupWorktreeOptions): Promise<void> {
   await exec(`git worktree remove ${worktreePath} --force`, repoDir);
   await exec(`git worktree prune`, repoDir);
   await exec(`git branch -d ${branch}`, repoDir);

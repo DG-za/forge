@@ -17,7 +17,24 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+
+      // Unused vars — warn, but allow underscore-prefixed
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+
+      // From code-cleanliness.md — Rule 1: 3 params max
+      'max-params': ['error', 3],
+
+      // From code-cleanliness.md — Rule 8/18: Don't mutate function arguments
+      'no-param-reassign': 'error',
+
+      // From code-cleanliness.md — Rule 20: Prefer immutability
+      'prefer-const': 'error',
+
+      // From code-cleanliness.md — Rule 35: Throw Error objects, not strings
+      'no-throw-literal': 'error',
+
+      // From code-cleanliness.md — Rule 37: No `any` as a shortcut
+      '@typescript-eslint/no-explicit-any': 'error',
     },
   },
   {

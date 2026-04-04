@@ -47,13 +47,13 @@ export async function runWorker(options: WorkerOptions): Promise<WorkerResult> {
       onAgentComplete: options.onAgentComplete,
     });
 
-    const prUrl = outcome.status === 'done' ? await createPullRequest(worktree.worktreePath, branch, task, exec) : null;
+    const prUrl = outcome.status === 'done' ? await createPullRequest({ worktreePath: worktree.worktreePath, branch, task, exec }) : null;
 
     return { issueNumber, status: outcome.status, cost: outcome.cost, prUrl, branch };
   } catch {
     return failed();
   } finally {
-    await cleanupWorktree(repo.repoDir, worktree.worktreePath, branch, exec);
+    await cleanupWorktree({ repoDir: repo.repoDir, worktreePath: worktree.worktreePath, branch, exec });
   }
 }
 
