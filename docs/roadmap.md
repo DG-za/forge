@@ -1,17 +1,17 @@
 # Roadmap 🗺️
 
-**Last updated:** 2026-03-24
+**Last updated:** 2026-04-04
 
 ## Current Phase
 
 ### Phase 4: AI Chat + MCPs 💬
 
 **Epic:** #19
-**Status:** in progress — 0/7 issues done
+**Status:** in progress — 1/7 issues done
 
 Interactive AI chat interface in the web UI with MCP integrations. Gives mobile access to a Claude/OpenAI assistant with tools like GitHub, TickTick, Gmail — a phone-accessible version of the second-brain Claude bot. Issues in dependency order:
 
-1. #61 — Chat data model + persistence
+1. ~~#61 — Chat data model + persistence~~ ✅
 2. #62 — MCP server registry — config and lifecycle
 3. #63 — Chat backend — streaming AI responses with tool use
 4. #64 — Chat UI — message thread + streaming
